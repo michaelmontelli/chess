@@ -1,16 +1,20 @@
 import pygame
 from pygame.locals import *
+from board import Board, Square, Rank
 
 
 class Engine:
-    def __init__(self):
-        self._running = True
-        self._display_surf = None
-        self.size = self.weight, self.height = 640, 400
+    SCREEN_WIDTH = 800
+    SCREEN_HEIGHT = 800
 
-    def on_init(self):
+    def __init__(self):
+        self._running = False
+        self._display_surface = None
+        self.size = (self.SCREEN_WIDTH, self.SCREEN_HEIGHT)
+
+    def initialize_engine(self):
         pygame.init()
-        self._display_surf = pygame.display.set_mode(self.size, pygame.HWSURFACE | pygame.DOUBLEBUF)
+        self._display_surface = pygame.display.set_mode(self.size, pygame.HWSURFACE | pygame.DOUBLEBUF)
         self._running = True
 
     # Process events
@@ -20,28 +24,27 @@ class Engine:
 
     # Compute changes
     def on_loop(self):
-        pass
+        # pygame.draw.rect(pygame.display.get_surface(), pygame.Color(255, 255, 255), pygame.Rect(0, 0, 100, 100))
+        board = Board()
+        board.draw()
 
     # Print graphics on screen
-    def on_render(self):
-        pass
+    def render(self):
+        pygame.display.flip()
 
-    def on_cleanup(self):
+    def cleanup(self):
         pygame.quit()
 
-    def on_execute(self):
-        if not self.on_init():
-            self._running = False
-
+    def execute(self):
         while self._running:
             for event in pygame.event.get():
                 self.on_event(event)
             self.on_loop()
-            self.on_render()
-        self.on_cleanup()
+            self.render()
+        self.cleanup()
 
 
 if __name__ == "__main__":
     engine = Engine()
-    engine.on_init()
-    engine.on_execute()
+    engine.initialize_engine()
+    engine.execute()
