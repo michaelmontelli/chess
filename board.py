@@ -3,6 +3,8 @@ from rank import Rank
 
 
 class Board:
+    BOARD_WIDTH = 8
+
     def __init__(self):
         self.board = Board.__make_board()
 
@@ -16,4 +18,3 @@ class Board:
     def draw(self):
         for rank in self.board:
             rank.draw()
-

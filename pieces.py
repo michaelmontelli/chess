@@ -1,68 +1,45 @@
 import pygame
-from piece import Piece, _get_image
+from piece import Piece
+from board import Board
+
+
+WHITE_STARTING_RANK = 6
+BLACK_STARTING_RANK = 1
 
 
 class Pawn(Piece):
-    WHITE = _get_image("pawn", "white")
-    BLACK = _get_image("pawn", "black")
+    WHITE_STARTING_LOCATION = [(column_index, WHITE_STARTING_RANK)
+                               for column_index in range(Board.BOARD_WIDTH)]
+    BLACK_STARTING_LOCATION = [(column_index, BLACK_STARTING_RANK)
+                               for column_index in range(Board.BOARD_WIDTH)]
 
-    def __init__(self, image, location):
-        super().__init__(image, location)
+    def __init__(self, color, location):
+        super().__init__(color, location)
 
     def move(self):
         pass
 
 
 class Knight(Piece):
-    WHITE = _get_image("knight", "white")
-    BLACK = _get_image("knight", "black")
-
-    def __init__(self, image, location):
-        super().__init__(image, location)
-
-    def move(self):
-        pass
+    def __init__(self, color, location):
+        super().__init__(color, location)
 
 
 class Bishop(Piece):
-    WHITE = _get_image("bishop", "white")
-    BLACK = _get_image("bishop", "black")
-
-    def __init__(self, image, location):
-        super().__init__(image, location)
-
-    def move(self):
-        pass
+    def __init__(self, color, location):
+        super().__init__(color, location)
 
 
 class Rook(Piece):
-    WHITE = _get_image("rook", "white")
-    BLACK = _get_image("rook", "black")
-
-    def __init__(self, image, location):
-        super().__init__(image, location)
-
-    def move(self):
-        pass
+    def __init__(self, color, location):
+        super().__init__(color, location)
 
 
 class Queen(Piece):
-    WHITE = _get_image("queen", "white")
-    BLACK = _get_image("queen", "black")
-
-    def __init__(self, image, location):
-        super().__init__(image, location)
-
-    def move(self):
-        pass
+    def __init__(self, color, location):
+        super().__init__(color, location)
 
 
 class King(Piece):
-    WHITE = _get_image("king", "white")
-    BLACK = _get_image("king", "black")
-
-    def __init__(self, image, location):
-        super().__init__(image, location)
-
-    def move(self):
-        pass
+    def __init__(self, color, location):
+        super().__init__(color, location)

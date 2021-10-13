@@ -1,8 +1,10 @@
 import pygame
 from pygame.locals import *
 from board import Board
-from pieces import (Pawn, Knight, Bishop,
-                    Rook, Queen, King)
+from pieces import (Pawn, Knight,
+                    Bishop, Rook,
+                    Queen, King)
+from setup import Setup
 
 
 class Engine:
@@ -29,10 +31,13 @@ class Engine:
         # pygame.draw.rect(pygame.display.get_surface(), pygame.Color(255, 255, 255), pygame.Rect(0, 0, 100, 100))
         board = Board()
         board.draw()
-        # white_pawn = Pawn(Pawn.WHITE, (100, 100))
+        # white_pawn = Pawn("white", (100, 100))
         # white_pawn.draw()
         # black_knight = King(King.BLACK, (200, 100))
         # black_knight.draw()
+        Setup.setup_white_pawns()
+        Setup.setup_black_pawns()
+        # TODO: Instead of blitting pieces individually, find way to blit at the same time
 
     # Print graphics on screen
     def render(self):
