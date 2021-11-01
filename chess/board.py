@@ -1,5 +1,6 @@
 import pygame
 from rank import Rank
+from pieces import *
 
 
 class Board:
@@ -14,7 +15,3 @@ class Board:
         for row_index in range(Rank.RANK_LENGTH):
             board.append(Rank(row_index))
         return board
-
-    def draw(self):
-        for rank in self.board:
-            rank.draw()

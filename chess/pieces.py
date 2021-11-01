@@ -1,18 +1,15 @@
-import pygame
-from piece import Piece
-from board import Board
+class Piece:
+    img = -1
 
+    def __init__(self, row, column):
+        self.row = row
+        self.column = column
 
-WHITE_STARTING_RANK = 6
-BLACK_STARTING_RANK = 1
+    def move(self):
+        pass
 
 
 class Pawn(Piece):
-    WHITE_STARTING_LOCATION = [(column_index, WHITE_STARTING_RANK)
-                               for column_index in range(Board.BOARD_WIDTH)]
-    BLACK_STARTING_LOCATION = [(column_index, BLACK_STARTING_RANK)
-                               for column_index in range(Board.BOARD_WIDTH)]
-
     def __init__(self, color, location):
         super().__init__(color, location)
 
