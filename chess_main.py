@@ -1,8 +1,7 @@
 """Main driver file. Handles user input and displays current GameState."""
 
 import pygame as p
-import numpy as np
-from chess import engine
+import engine
 
 WIDTH = HEIGHT = 800
 DIMENSION = 8
