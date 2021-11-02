@@ -11,8 +11,14 @@ IMAGES = [{}, {}]
 ColorType = bool
 COLORS = [WHITE, BLACK] = [True, False]
 COLOR_NAMES = ["black", "white"]
-WHITE_COLOR = (255, 253, 208)
-BLACK_COLOR = (0, 102, 204)
+# WHITE_COLOR = (255, 253, 208)
+# BLACK_COLOR = (0, 102, 204)
+WHITE_COLOR = (234, 232, 210)
+BLACK_COLOR = (75, 115, 153)
+HIGHLIGHTED_WHITE_COLOR = (140, 199, 232)
+HIGHLIGHTED_BLACK_COLOR = (53, 139, 203)
+COLOR_SHADES = [pygame.Color(WHITE_COLOR), pygame.Color(BLACK_COLOR)]
+HIGHLIGHTED_COLOR_SHADES = [HIGHLIGHTED_WHITE_COLOR, HIGHLIGHTED_BLACK_COLOR]
 
 PieceType = int
 PIECE_TYPES = [PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING] = range(1, 7)
@@ -72,10 +78,11 @@ class GraphicalView:
             # shut down the pygame graphics
             self.is_initialized = False
             pygame.quit()
-        elif isinstance(event, TickEvent):
+        elif isinstance(event, InputEvent):
             self.render_all()
             # limit the redraw speed to MAX_FPS frames per second
             self.clock.tick(MAX_FPS)
+        # BEFORE WAS ON TICK EVENT
 
     def render_all(self):
         """
@@ -99,15 +106,16 @@ class GraphicalView:
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
         self.clock = pygame.time.Clock()
         self.is_initialized = True
-        self.draw_board()
         load_images()
+        self.draw_board()
+        self.draw_game_state()
+        pygame.display.flip()
 
     def draw_board(self):
         """Draws the squares on the board"""
-        colors = [pygame.Color(WHITE_COLOR), pygame.Color(BLACK_COLOR)]
         for row in range(DIMENSION):
             for column in range(DIMENSION):
-                color = colors[(row + column) % 2]  # Light squares have even parity, dark have odd parity
+                color = COLOR_SHADES[(row + column) % 2]  # Light squares have even parity, dark have odd parity
                 pygame.draw.rect(self.screen,
                                  color,
                                  pygame.Rect(column * SQUARE_SIZE, row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE)
@@ -118,4 +126,22 @@ class GraphicalView:
         for row in self.model.board:
             for piece in row:
                 if piece.TYPE:
+                    if piece.is_selected:
+                        self.select_piece(piece.row, piece.column)
+                    else:
+                        self.deselect_piece(piece.row, piece.column)
                     self.screen.blit(IMAGES[piece.COLOR][piece.TYPE], (piece.column * SQUARE_SIZE, piece.row * SQUARE_SIZE))
+
+    def select_piece(self, row, column):
+        color = HIGHLIGHTED_COLOR_SHADES[(row + column) % 2]  # Light squares have even parity, dark have odd parity
+        pygame.draw.rect(self.screen,
+                         color,
+                         pygame.Rect(column * SQUARE_SIZE, row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE)
+                         )
+
+    def deselect_piece(self, row, column):
+        color = COLOR_SHADES[(row + column) % 2]  # Light squares have even parity, dark have odd parity
+        pygame.draw.rect(self.screen,
+                         color,
+                         pygame.Rect(column * SQUARE_SIZE, row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE)
+                         )

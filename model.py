@@ -20,6 +20,7 @@ class GameEngine:
         self.running = False
 
         self.board = Board().board
+        self.selected_piece = None
         self.white_to_move = True
         self.move_log = []
 

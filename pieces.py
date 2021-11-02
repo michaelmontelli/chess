@@ -15,6 +15,8 @@ class Piece:
         self.row = row
         self.column = column
 
+        self.is_selected = False
+
     def move(self):
         pass
 
