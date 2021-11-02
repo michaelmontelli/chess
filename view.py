@@ -24,7 +24,7 @@ def color_type_to_name(color_type: ColorType) -> str:
 
 
 def color_name_to_type(color_name: str) -> ColorType:
-    return COLOR_NAMES.index(color_name)
+    return ColorType(COLOR_NAMES.index(color_name))
 
 
 def piece_type_to_name(piece_type: PieceType) -> str:
@@ -85,7 +85,7 @@ class GraphicalView:
 
         if not self.is_initialized:
             return
-        # self.draw_game_state()
+        self.draw_game_state()
         # flip the display to show whatever we drew
         pygame.display.flip()
 
@@ -115,9 +115,7 @@ class GraphicalView:
 
     def draw_game_state(self):
         """Draws the pieces on the board from the current game state."""
-        for row in range(DIMENSION):
-            for column in range(DIMENSION):
-                piece = model.board[row, column]
-                if piece != '-':
-                    self.screen.blit(IMAGES[piece],
-                                     pygame.Rect(column * SQUARE_SIZE, row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
+        for row in self.model.board:
+            for piece in row:
+                if piece.TYPE:
+                    self.screen.blit(IMAGES[piece.COLOR][piece.TYPE], (piece.column * SQUARE_SIZE, piece.row * SQUARE_SIZE))

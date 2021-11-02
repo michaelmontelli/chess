@@ -19,7 +19,7 @@ class GameEngine:
         event_manager.register_listener(self)
         self.running = False
 
-        self.board = Board()
+        self.board = Board().board
         self.white_to_move = True
         self.move_log = []
 
@@ -42,6 +42,3 @@ class GameEngine:
         while self.running:
             new_tick = TickEvent()
             self.event_manager.post(new_tick)
-
-    def create_board(self):
-        pass
