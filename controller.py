@@ -44,7 +44,8 @@ class Keyboard:
         column_index = pos[0] // SQUARE_SIZE
         row_index = pos[1] // SQUARE_SIZE
 
-        self.model.selected_piece = False
+        if self.model.selected_piece:
+            self.model.selected_piece.is_selected = False
 
         selected_piece = self.model.board[row_index][column_index]
         selected_piece.is_selected = not selected_piece.is_selected
