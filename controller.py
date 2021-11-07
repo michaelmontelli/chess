@@ -37,6 +37,7 @@ class Keyboard:
                         self.event_manager.post(QuitEvent())
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     pos = pygame.mouse.get_pos()
+                    # self.process_turn()
                     self.select_piece(pos)
                     self.event_manager.post(InputEvent(pos))
 
@@ -44,14 +45,16 @@ class Keyboard:
         column_index = pos[0] // SQUARE_SIZE
         row_index = pos[1] // SQUARE_SIZE
 
-        if self.model.selected_piece:
-            self.model.selected_piece.is_selected = False
+        previous_selected_piece = self.model.selected_piece
+        if previous_selected_piece is not None:
+            previous_selected_piece.switch_selected_status()
 
         selected_piece = self.model.board[row_index][column_index]
-        selected_piece.is_selected = not selected_piece.is_selected
-        print(selected_piece)
-        print(selected_piece.is_selected)
-        self.model.selected_piece = selected_piece
+        if selected_piece.TYPE:
+            selected_piece.switch_selected_status()
+            self.model.selected_piece = selected_piece
+        else:    # Player wants to move piece to the selected blank square
+            self.model.swap(selected_piece, previous_selected_piece)
 
-        # self.model.selected_square_index = row_index, column_index
+
 

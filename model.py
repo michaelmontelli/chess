@@ -43,3 +43,10 @@ class GameEngine:
         while self.running:
             new_tick = TickEvent()
             self.event_manager.post(new_tick)
+
+    def swap(self, piece1, piece2):
+        piece1.row, piece2.row = piece2.row, piece1.row
+        piece1.column, piece2.column = piece2.column, piece1.column
+
+        self.board[piece1.row][piece1.column] = piece1
+        self.board[piece2.row][piece2.column] = piece2

@@ -17,6 +17,9 @@ class Piece:
 
         self.is_selected = False
 
+    def switch_selected_status(self):
+        self.is_selected = not self.is_selected
+
     def move(self):
         pass
 

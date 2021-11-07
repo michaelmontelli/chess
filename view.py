@@ -131,6 +131,12 @@ class GraphicalView:
                     else:
                         self.deselect_piece(piece.row, piece.column)
                     self.screen.blit(IMAGES[piece.COLOR][piece.TYPE], (piece.column * SQUARE_SIZE, piece.row * SQUARE_SIZE))
+                else:
+                    color = COLOR_SHADES[(piece.row + piece.column) % 2]
+                    pygame.draw.rect(self.screen,
+                                     color,
+                                     pygame.Rect(piece.column * SQUARE_SIZE, piece.row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE)
+                                     )
 
     def select_piece(self, row, column):
         color = HIGHLIGHTED_COLOR_SHADES[(row + column) % 2]  # Light squares have even parity, dark have odd parity
