@@ -50,3 +50,4 @@ class GameEngine:
 
         self.board[piece1.row][piece1.column] = piece1
         self.board[piece2.row][piece2.column] = piece2
+
