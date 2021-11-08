@@ -98,7 +98,8 @@ class Keyboard:
         selected_piece = self.model.selected_piece
         if selected_piece is not None:
             selected_piece.is_selected = not selected_piece.is_selected
-            
+
+        self.model.color_to_move = not self.model.color_to_move
         move_log = self.model.move_log
         if len(move_log) > 0:
             piece1, piece2 = move_log[-1]
