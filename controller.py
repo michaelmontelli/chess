@@ -1,6 +1,7 @@
 import pygame
 import model
 from eventmanager import *
+from board import DebugBoard
 
 WIDTH = HEIGHT = 800
 DIMENSION = 8
@@ -77,9 +78,7 @@ class Keyboard:
     def capture(self, clicked_piece):
         previous_selected_piece = self.model.selected_piece
         if previous_selected_piece is not None:
-            print(self.model.board)
             self.model.capture(clicked_piece, previous_selected_piece)
-            print(self.model.board)
             self.deselect_previous_piece(previous_selected_piece)
 
     def deselect_previous_piece(self, previous_selected_piece):

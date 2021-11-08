@@ -22,9 +22,19 @@ class Board:
                 piece.row = self.board.index(row)
                 piece.column = row.index(piece)
 
+
+class DebugBoard:
+    def __init__(self, board):
+        self.board = board
+
     def __str__(self):
-        for piece in self.board:
-            pass
+        output = ''
+        for row in self.board:
+            output += '['
+            for piece in row:
+                output += f' {PIECE_NAMES[piece.TYPE]}'
+            output += ']\n'
+        return output
 
     # TODO: Decide if want a board object in main or just the board list
     # def swap(self, piece1, piece2):

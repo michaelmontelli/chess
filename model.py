@@ -56,9 +56,10 @@ class GameEngine:
         self.board[piece2.row][piece2.column] = piece2
 
     def capture(self, captured_piece, taker_piece):
-        print(taker_piece.row, taker_piece.column)
-        self.board[taker_piece.row][taker_piece.column] = Blank()
+        self.board[taker_piece.row][taker_piece.column] = Blank(taker_piece.row, taker_piece.column)
 
         taker_piece.row, taker_piece.column = captured_piece.row, captured_piece.column
         self.board[taker_piece.row][taker_piece.column] = taker_piece
+
+
 
