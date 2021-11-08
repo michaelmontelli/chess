@@ -5,6 +5,8 @@ from eventmanager import *
 WIDTH = HEIGHT = 800
 DIMENSION = 8
 SQUARE_SIZE = HEIGHT // DIMENSION
+COLORS = [WHITE, BLACK] = [True, False]
+COLOR_NAMES = ["black", "white"]
 
 
 class Keyboard:
@@ -53,15 +55,22 @@ class Keyboard:
         row_index = pos[1] // SQUARE_SIZE
 
         clicked_piece = self.model.board[row_index][column_index]
-        if clicked_piece.TYPE:
+        if clicked_piece.TYPE and clicked_piece.COLOR == self.model.color_to_move:
             self.select_piece(clicked_piece)
         else:    # Player wants to move piece to the selected blank square
-            # clicked_piece is always blank
+            self.handle_move(clicked_piece)
+
+    def handle_move(self, clicked_piece):
+        if not clicked_piece.TYPE:
             previous_selected_piece = self.model.selected_piece
             if previous_selected_piece is not None:
                 self.model.swap(clicked_piece, previous_selected_piece)
                 previous_selected_piece.is_selected = False
                 self.model.selected_piece = None
+                self.model.color_to_move = not self.model.color_to_move
+        else:
+            pass
+
 
 
 

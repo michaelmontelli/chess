@@ -2,6 +2,9 @@ import pygame
 from eventmanager import *
 from board import Board
 
+COLORS = [WHITE, BLACK] = [True, False]
+COLOR_NAMES = ["black", "white"]
+
 
 class GameEngine:
     """
@@ -21,7 +24,7 @@ class GameEngine:
 
         self.board = Board().board
         self.selected_piece = None
-        self.white_to_move = True
+        self.color_to_move = WHITE
         self.move_log = []
 
     def notify(self, event):
