@@ -61,5 +61,7 @@ class GameEngine:
         taker_piece.row, taker_piece.column = captured_piece.row, captured_piece.column
         self.board[taker_piece.row][taker_piece.column] = taker_piece
 
+    def append_move(self, piece1, piece2):
+        self.move_log.append((piece1, piece2))
 
 
