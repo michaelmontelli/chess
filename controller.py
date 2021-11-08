@@ -96,7 +96,9 @@ class Keyboard:
 
     def undo_move(self):
         selected_piece = self.model.selected_piece
-        selected_piece.is_selected = not selected_piece.is_selected
+        if selected_piece is not None:
+            selected_piece.is_selected = not selected_piece.is_selected
+            
         move_log = self.model.move_log
         if len(move_log) > 0:
             piece1, piece2 = move_log[-1]
