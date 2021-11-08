@@ -1,6 +1,7 @@
 import pygame
 import model
 from eventmanager import *
+from constants import *
 
 WIDTH = HEIGHT = 800
 DIMENSION = 8
@@ -8,9 +9,6 @@ SQUARE_SIZE = HEIGHT // DIMENSION
 MAX_FPS = 15
 IMAGES = [{}, {}]
 
-ColorType = bool
-COLORS = [WHITE, BLACK] = [True, False]
-COLOR_NAMES = ["black", "white"]
 # WHITE_COLOR = (255, 253, 208)
 # BLACK_COLOR = (0, 102, 204)
 WHITE_COLOR = (234, 232, 210)
@@ -19,10 +17,6 @@ HIGHLIGHTED_WHITE_COLOR = (140, 199, 232)
 HIGHLIGHTED_BLACK_COLOR = (53, 139, 203)
 COLOR_SHADES = [pygame.Color(WHITE_COLOR), pygame.Color(BLACK_COLOR)]
 HIGHLIGHTED_COLOR_SHADES = [HIGHLIGHTED_WHITE_COLOR, HIGHLIGHTED_BLACK_COLOR]
-
-PieceType = int
-PIECE_TYPES = [PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING] = range(1, 7)
-PIECE_NAMES = [None, "pawn", "knight", "bishop", "rook", "queen", "king"]
 
 
 def color_type_to_name(color_type: ColorType) -> str:

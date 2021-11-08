@@ -1,6 +1,7 @@
 import pygame
 from eventmanager import *
 from board import Board
+from pieces import Blank
 
 COLORS = [WHITE, BLACK] = [True, False]
 COLOR_NAMES = ["black", "white"]
@@ -53,4 +54,11 @@ class GameEngine:
 
         self.board[piece1.row][piece1.column] = piece1
         self.board[piece2.row][piece2.column] = piece2
+
+    def capture(self, captured_piece, taker_piece):
+        print(taker_piece.row, taker_piece.column)
+        self.board[taker_piece.row][taker_piece.column] = Blank()
+
+        taker_piece.row, taker_piece.column = captured_piece.row, captured_piece.column
+        self.board[taker_piece.row][taker_piece.column] = taker_piece
 

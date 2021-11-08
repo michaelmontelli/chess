@@ -1,10 +1,6 @@
 import pygame
-from rank import Rank
 from pieces import *
-
-ColorType = bool
-COLORS = [WHITE, BLACK] = [True, False]
-COLOR_NAMES = ["black", "white"]
+from constants import *
 
 
 class Board:
@@ -25,6 +21,10 @@ class Board:
             for piece in row:
                 piece.row = self.board.index(row)
                 piece.column = row.index(piece)
+
+    def __str__(self):
+        for piece in self.board:
+            pass
 
     # TODO: Decide if want a board object in main or just the board list
     # def swap(self, piece1, piece2):

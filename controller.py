@@ -57,19 +57,35 @@ class Keyboard:
         clicked_piece = self.model.board[row_index][column_index]
         if clicked_piece.TYPE and clicked_piece.COLOR == self.model.color_to_move:
             self.select_piece(clicked_piece)
-        else:    # Player wants to move piece to the selected blank square
-            self.handle_move(clicked_piece)
+        else:    # Player wants to move piece to the selected blank square or capture
+            self.handle_turn(clicked_piece)
 
-    def handle_move(self, clicked_piece):
+    def handle_turn(self, clicked_piece):
         if not clicked_piece.TYPE:
-            previous_selected_piece = self.model.selected_piece
-            if previous_selected_piece is not None:
-                self.model.swap(clicked_piece, previous_selected_piece)
-                previous_selected_piece.is_selected = False
-                self.model.selected_piece = None
-                self.model.color_to_move = not self.model.color_to_move
+            # clicked_piece is a blank piece, the location of where to move
+            self.move(clicked_piece)
         else:
-            pass
+            # clicked_piece is a piece of the opposite color
+            self.capture(clicked_piece)
+
+    def move(self, clicked_piece):
+        previous_selected_piece = self.model.selected_piece
+        if previous_selected_piece is not None:
+            self.model.swap(clicked_piece, previous_selected_piece)
+            self.deselect_previous_piece(previous_selected_piece)
+
+    def capture(self, clicked_piece):
+        previous_selected_piece = self.model.selected_piece
+        if previous_selected_piece is not None:
+            print(self.model.board)
+            self.model.capture(clicked_piece, previous_selected_piece)
+            print(self.model.board)
+            self.deselect_previous_piece(previous_selected_piece)
+
+    def deselect_previous_piece(self, previous_selected_piece):
+        previous_selected_piece.is_selected = False
+        self.model.selected_piece = None
+        self.model.color_to_move = not self.model.color_to_move
 
 
 
