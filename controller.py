@@ -111,7 +111,7 @@ class Keyboard:
         # # If the move log is empty, it means we are at the first turn of the game.
         # # White always moves first
         if len(move_log) == 0:
-            self.model.color_to_move = not self.model.color_to_move
+            self.model.color_to_move = True
 
     def append_move(self, clicked_piece):
         piece1 = self.model.selected_piece
