@@ -79,13 +79,13 @@ class Keyboard:
 
     def move(self, clicked_piece):
         previous_selected_piece = self.model.selected_piece
-        if previous_selected_piece is not None:
+        if previous_selected_piece is not None and previous_selected_piece.is_selected:
             self.model.swap(clicked_piece, previous_selected_piece)
             self.deselect_previous_piece(previous_selected_piece)
 
     def capture(self, clicked_piece):
         previous_selected_piece = self.model.selected_piece
-        if previous_selected_piece is not None:
+        if previous_selected_piece is not None and previous_selected_piece.is_selected:
             self.model.capture(clicked_piece, previous_selected_piece)
             self.deselect_previous_piece(previous_selected_piece)
 
@@ -95,6 +95,8 @@ class Keyboard:
         self.model.color_to_move = not self.model.color_to_move
 
     def undo_move(self):
+        selected_piece = self.model.selected_piece
+        selected_piece.is_selected = not selected_piece.is_selected
         move_log = self.model.move_log
         if len(move_log) > 0:
             piece1, piece2 = move_log[-1]
