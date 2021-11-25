@@ -78,7 +78,17 @@ class Knight(Piece):
         super().__init__(color, row, column)
 
     def get_pseudo_legal_moves(self, board):
-        return set()
+        moves = set()
+        directions = [(-1, -2), (-1, 2), (1, -2), (1, 2), (-2, -1), (-2, 1), (2, -1), (2, 1)]
+
+        for direction in directions:
+            end_row = self.row + direction[0]
+            end_column = self.column + direction[1]
+            if on_the_board(end_row, end_column):
+                end_piece = board[end_row][end_column]
+                if end_piece.COLOR != self.COLOR:
+                    moves.add((end_piece.row, end_piece.column))
+        return moves
 
 
 class Bishop(Piece):
@@ -90,7 +100,7 @@ class Bishop(Piece):
     def get_pseudo_legal_moves(self, board):
         moves = set()
 
-        directions = ((-1, -1), (1, -1), (-1, 1), (1, 1))
+        directions = [(-1, -1), (1, -1), (-1, 1), (1, 1)]
         opposite_color = not self.COLOR
 
         for direction in directions:
@@ -120,7 +130,7 @@ class Rook(Piece):
     def get_pseudo_legal_moves(self, board):
         moves = set()
 
-        directions = ((-1, 0), (0, -1), (1, 0), (0, 1))
+        directions = [(-1, 0), (0, -1), (1, 0), (0, 1)]
         opposite_color = not self.COLOR
 
         for direction in directions:
