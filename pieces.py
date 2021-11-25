@@ -66,15 +66,14 @@ class Pawn(Piece):
                 moves.add((right_diagonal_piece.row, right_diagonal_piece.column))
 
 
-
-
-
-
 class Knight(Piece):
     TYPE = KNIGHT
 
     def __init__(self, color, row=-1, column=-1):
         super().__init__(color, row, column)
+
+    def get_pseudo_legal_moves(self, board):
+        return set()
 
 
 class Bishop(Piece):
@@ -83,12 +82,18 @@ class Bishop(Piece):
     def __init__(self, color, row=-1, column=-1):
         super().__init__(color, row, column)
 
+    def get_pseudo_legal_moves(self, board):
+        return set()
+
 
 class Rook(Piece):
     TYPE = ROOK
 
     def __init__(self, color, row=-1, column=-1):
         super().__init__(color, row, column)
+
+    def get_pseudo_legal_moves(self, board):
+        return set()
 
 
 class Queen(Piece):
@@ -97,12 +102,18 @@ class Queen(Piece):
     def __init__(self, color, row=-1, column=-1):
         super().__init__(color, row, column)
 
+    def get_pseudo_legal_moves(self, board):
+        return set()
+
 
 class King(Piece):
     TYPE = KING
 
     def __init__(self, color, row=-1, column=-1):
         super().__init__(color, row, column)
+
+    def get_pseudo_legal_moves(self, board):
+        return set()
 
 
 class Blank(Piece):
