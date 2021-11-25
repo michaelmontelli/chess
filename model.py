@@ -28,6 +28,9 @@ class GameEngine:
         self.color_to_move = WHITE
         self.move_log = []
 
+        self.white_king = self.board[7][4]
+        self.black_king = self.board[0][4]
+
     def notify(self, event):
         """
         Called by an event in the message queue.
@@ -64,9 +67,43 @@ class GameEngine:
     def append_move(self, piece1, piece2):
         self.move_log.append((piece1, piece2))
 
-    def get_legal_moves(self):
+    def get_pseudo_legal_moves(self):
         if self.selected_piece.COLOR == self.color_to_move:
             # TODO: Check if we need to change this to legal_moves
             return self.selected_piece.get_pseudo_legal_moves(self.board)
 
+    # def get_legal_moves(self):
+    #     # if self.selected_piece.COLOR == self.color_to_move:
+    #     #     return self.selected_piece.get_legal_moves(self.board)
+    #     self.get_check_status()
+
+    # def get_check_status(self):
+    # #     if self.color_to_move == WHITE:
+    # #         self._get_check_status_white()
+    # #     elif self.color_to_move == BLACK:
+    # #         self._get_check_status_black()
+    # #
+    # # def _get_check_status_white(self):
+    # #     directions = [(-1, 0), (0, -1), (1, 0), (0, 1), (-1, -1), (1, -1), (-1, 1), (1, 1)]
+    # #
+    # # def _get_check_status_black(self):
+    # #     pass
+    #     if self.color_to_move == WHITE:
+    #         self.white_king.update_check_status(self.board)
+    #     elif self.color_to_move == BLACK:
+    #         self.black_king.update_check_status(self.board)
+
+    def update_check_status(self):
+    #     if self.color_to_move == WHITE:
+    #         self._get_check_status_white()
+    #     elif self.color_to_move == BLACK:
+    #         self._get_check_status_black()
+    #
+    # def _get_check_status_white(self):
+    #     directions = [(-1, 0), (0, -1), (1, 0), (0, 1), (-1, -1), (1, -1), (-1, 1), (1, 1)]
+    #
+    # def _get_check_status_black(self):
+    #     pass
+        self.white_king.update_check_status(self.board)
+        self.black_king.update_check_status(self.board)
 

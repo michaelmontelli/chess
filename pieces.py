@@ -15,8 +15,11 @@ class Piece:
 
         self.is_selected = False
 
-    def switch_selected_status(self):
-        self.is_selected = not self.is_selected
+    def get_legal_moves(self, board):
+        pass
+
+    def get_pseudo_legal_moves(self, board):
+        pass
 
 
 class Pawn(Piece):
@@ -25,32 +28,42 @@ class Pawn(Piece):
     def __init__(self, color, row=-1, column=-1):
         super().__init__(color, row, column)
 
+    def get_legal_moves(self, board):
+        moves = set()
+        if self.COLOR == WHITE:
+            self._get_legal_moves_white(board, moves)
+        elif self.COLOR == BLACK:
+            self._get_legal_moves_black(board, moves)
+
+    def _get_legal_moves_white(self, board, moves):
+        pass
+
     def get_pseudo_legal_moves(self, board):
         moves = set()
         if self.COLOR == WHITE:
-            self.check_forward_moves_white(board, moves)
-            self.check_captures_white(board, moves)
+            self._check_forward_moves_white(board, moves)
+            self._check_captures_white(board, moves)
         elif self.COLOR == BLACK:
-            self.check_forward_moves_black(board, moves)
-            self.check_captures_black(board, moves)
+            self._check_forward_moves_black(board, moves)
+            self._check_captures_black(board, moves)
         # TODO: Pawn Promotions
         return moves
 
-    def check_forward_moves_white(self, board, moves):
+    def _check_forward_moves_white(self, board, moves):
         if board[self.row - 1][self.column].TYPE == BLANK:  # One square
             moves.add((self.row - 1, self.column))
             # Needs to be nested, because need both squares to be empty
             if self.row == 6 and board[self.row - 2][self.column].TYPE == BLANK:  # Two squares
                 moves.add((self.row - 2, self.column))
 
-    def check_forward_moves_black(self, board, moves):
+    def _check_forward_moves_black(self, board, moves):
         if board[self.row + 1][self.column].TYPE == BLANK:  # One square
             moves.add((self.row + 1, self.column))
             # Needs to be nested, because need both squares to be empty
             if self.row == 1 and board[self.row + 2][self.column].TYPE == BLANK:  # Two squares
                 moves.add((self.row + 2, self.column))
 
-    def check_captures_white(self, board, moves):
+    def _check_captures_white(self, board, moves):
         if self.column > 0:  # Left captures, not on edge of the board
             left_diagonal_piece = board[self.row - 1][self.column - 1]
             if left_diagonal_piece.TYPE != BLANK and left_diagonal_piece.COLOR == BLACK:
@@ -60,7 +73,7 @@ class Pawn(Piece):
             if right_diagonal_piece.TYPE != BLANK and right_diagonal_piece.COLOR == BLACK:
                 moves.add((right_diagonal_piece.row, right_diagonal_piece.column))
 
-    def check_captures_black(self, board, moves):
+    def _check_captures_black(self, board, moves):
         if self.column > 0:  # Left captures
             left_diagonal_piece = board[self.row + 1][self.column - 1]
             if left_diagonal_piece.TYPE != BLANK and left_diagonal_piece.COLOR == WHITE:
@@ -104,9 +117,9 @@ class Bishop(Piece):
         opposite_color = not self.COLOR
 
         for direction in directions:
-            for squares_moved in range(1, len(board)):
-                end_row = self.row + direction[0] * squares_moved
-                end_column = self.column + direction[1] * squares_moved
+            for num_squares_moved in range(1, len(board)):
+                end_row = self.row + direction[0] * num_squares_moved
+                end_column = self.column + direction[1] * num_squares_moved
                 if on_the_board(end_row, end_column):
                     end_piece = board[end_row][end_column]
                     if end_piece.TYPE == BLANK:
@@ -134,9 +147,9 @@ class Rook(Piece):
         opposite_color = not self.COLOR
 
         for direction in directions:
-            for squares_moved in range(1, len(board)):
-                end_row = self.row + direction[0] * squares_moved
-                end_column = self.column + direction[1] * squares_moved
+            for num_squares_moved in range(1, len(board)):
+                end_row = self.row + direction[0] * num_squares_moved
+                end_column = self.column + direction[1] * num_squares_moved
                 if on_the_board(end_row, end_column):
                     end_piece = board[end_row][end_column]
                     if end_piece.TYPE == BLANK:
@@ -146,7 +159,7 @@ class Rook(Piece):
                         break
                     elif end_piece.COLOR == self.COLOR:
                         break
-                else:    # The square is off the board
+                else:  # The square is off the board
                     break
         return moves
 
@@ -163,11 +176,31 @@ class Queen(Piece):
         return set.union(rook.get_pseudo_legal_moves(board), bishop.get_pseudo_legal_moves(board))
 
 
+def is_cardinal_piece(piece):
+    return piece.TYPE in {ROOK, QUEEN}
+
+
+def in_range_of_king(end_piece, num_squares_away):
+    return num_squares_away == 1 and end_piece.TYPE == KING
+
+
+def in_range_of_pawn(end_piece, num_squares_away, direction):
+    if end_piece.COLOR == WHITE:
+        return num_squares_away == 1 and end_piece.TYPE == PAWN and direction in {(1, -1), (1, 1)}
+    elif end_piece.COLOR == BLACK:
+        return num_squares_away == 1 and end_piece.TYPE == PAWN and direction in {(-1, -1), (-1, 1)}
+
+
+def is_diagonal_piece(piece):
+    return piece.TYPE in {BISHOP, QUEEN}
+
+
 class King(Piece):
     TYPE = KING
 
     def __init__(self, color, row=-1, column=-1):
         super().__init__(color, row, column)
+        self.in_check = False
 
     def get_pseudo_legal_moves(self, board):
         moves = set()
@@ -182,6 +215,78 @@ class King(Piece):
                     moves.add((end_piece.row, end_piece.column))
         return moves
 
+    def update_check_status(self, board):
+        cardinal_status = self.update_check_status_from_cardinal_directions(board)
+        diagonal_status = self.update_check_status_from_diagonal_directions(board)
+        knight_status = self.update_check_status_from_knights(board)
+
+        if any([cardinal_status, diagonal_status, knight_status]):
+            self.in_check = True
+        else:
+            self.in_check = False
+
+    def update_check_status_from_cardinal_directions(self, board):
+        directions = [(-1, 0), (0, -1), (1, 0), (0, 1)]
+        opposite_color = not self.COLOR
+        for direction in directions:
+            for num_squares_away in range(1, len(board)):
+                end_row = self.row + direction[0] * num_squares_away
+                end_column = self.column + direction[1] * num_squares_away
+                if on_the_board(end_row, end_column):
+                    end_piece = board[end_row][end_column]
+                    if end_piece.COLOR == self.COLOR:
+                        break
+                    elif end_piece.COLOR == opposite_color:
+                        if in_range_of_king(end_piece, num_squares_away) or is_cardinal_piece(end_piece):
+                            print("cardinal")
+                            print(end_piece.TYPE)
+                            print(end_piece.row)
+                            print(end_piece.column)
+                            return True
+                        # if a enemy piece that doesn't check the king is found, stop looking in this direction
+                        break
+        return False
+
+    def update_check_status_from_diagonal_directions(self, board):
+        directions = [(-1, -1), (1, -1), (-1, 1), (1, 1)]
+        opposite_color = not self.COLOR
+        for direction in directions:
+            for num_squares_away in range(1, len(board)):
+                end_row = self.row + direction[0] * num_squares_away
+                end_column = self.column + direction[1] * num_squares_away
+                if on_the_board(end_row, end_column):
+                    end_piece = board[end_row][end_column]
+                    if end_piece.COLOR == self.COLOR:
+                        break
+                    elif end_piece.COLOR == opposite_color:
+                        if (in_range_of_king(end_piece, num_squares_away)
+                                or in_range_of_pawn(end_piece, num_squares_away, direction)
+                                or is_diagonal_piece(end_piece)):
+                            print("diagonal")
+                            print(end_piece.TYPE)
+                            print(end_piece.row)
+                            print(end_piece.column)
+                            return True
+                        # if a enemy piece that doesn't check the king is found, stop looking in this direction
+                        break
+        return False
+
+    def update_check_status_from_knights(self, board):
+        directions = [(-1, -2), (-1, 2), (1, -2), (1, 2), (-2, -1), (-2, 1), (2, -1), (2, 1)]
+        opposite_color = not self.COLOR
+
+        for direction in directions:
+            end_row = self.row + direction[0]
+            end_column = self.column + direction[1]
+            if on_the_board(end_row, end_column):
+                end_piece = board[end_row][end_column]
+                if end_piece.COLOR == opposite_color and end_piece.TYPE == KNIGHT:
+                    print("knight")
+                    print(end_piece.TYPE)
+                    print(end_piece.row)
+                    print(end_piece.column)
+                    return True
+        return False
 
 
 class Blank(Piece):

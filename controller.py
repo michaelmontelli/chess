@@ -2,13 +2,12 @@ import pygame
 from copy import deepcopy
 import model
 from eventmanager import *
+from constants import *
 from board import DebugBoard
 
 WIDTH = HEIGHT = 800
 DIMENSION = 8
 SQUARE_SIZE = HEIGHT // DIMENSION
-COLORS = [WHITE, BLACK] = [True, False]
-COLOR_NAMES = ["black", "white"]
 
 
 class Keyboard:
@@ -69,7 +68,8 @@ class Keyboard:
     def handle_turn(self, clicked_piece):
         previous_selected_piece = self.model.selected_piece
         if previous_selected_piece is not None and previous_selected_piece.COLOR == self.model.color_to_move:
-            legal_moves = self.model.get_legal_moves()
+            legal_moves = self.model.get_pseudo_legal_moves()    # TODO: Change to legal moves()
+            # self.model.get_legal_moves()    # TODO: Changed when done implementing
             if (clicked_piece.row, clicked_piece.column) in legal_moves:
                 self.process_legal_move(clicked_piece)
 
@@ -81,6 +81,17 @@ class Keyboard:
         else:
             # clicked_piece is a piece of the opposite color
             self.capture(clicked_piece)
+        self.model.update_check_status()
+
+        print(self.model.color_to_move)
+        print("White King: ")
+        print("-------------")
+        print(f"Location: {self.model.white_king.row}, {self.model.white_king.column}")
+        print(f"In Check: {self.model.white_king.in_check}")
+        print("Black King: ")
+        print("-------------")
+        print(f"Location: {self.model.black_king.row}, {self.model.black_king.column}")
+        print(f"In Check: {self.model.black_king.in_check}")
 
     def move(self, clicked_piece):
         previous_selected_piece = self.model.selected_piece
@@ -107,12 +118,15 @@ class Keyboard:
         self.model.color_to_move = not self.model.color_to_move
         move_log = self.model.move_log
         if len(move_log) > 0:
-            piece1, piece2 = move_log[-1]
-            move_log.pop()
+            piece1, piece2 = move_log.pop()
 
             for piece in (piece1, piece2):
                 if piece is not None:
                     self.model.board[piece.row][piece.column] = piece
+                    if piece.TYPE == KING and piece.COLOR == WHITE:
+                        self.model.white_king = piece
+                    elif piece.TYPE == KING and piece.COLOR == BLACK:
+                        self.model.black_king = piece
 
         # # If the move log is empty, it means we are at the first turn of the game.
         # # White always moves first
