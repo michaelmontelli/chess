@@ -1,6 +1,10 @@
 from constants import *
 
 
+def on_the_board(row, column):
+    return 0 <= row < 8 and 0 <= column < 8
+
+
 class Piece:
     TYPE = -1
 
@@ -29,6 +33,7 @@ class Pawn(Piece):
         elif self.COLOR == BLACK:
             self.check_forward_moves_black(board, moves)
             self.check_captures_black(board, moves)
+        # TODO: Pawn Promotions
         return moves
 
     def check_forward_moves_white(self, board, moves):
@@ -93,7 +98,27 @@ class Rook(Piece):
         super().__init__(color, row, column)
 
     def get_pseudo_legal_moves(self, board):
-        return set()
+        moves = set()
+
+        directions = ((-1, 0), (0, -1), (1, 0), (0, 1))
+        opposite_color = not self.COLOR
+
+        for direction in directions:
+            for squares_moved in range(1, len(board)):
+                end_row = self.row + direction[0] * squares_moved
+                end_column = self.column + direction[1] * squares_moved
+                if on_the_board(end_row, end_column):
+                    end_piece = board[end_row][end_column]
+                    if end_piece.TYPE == BLANK:
+                        moves.add((end_piece.row, end_piece.column))
+                    elif end_piece.COLOR == opposite_color:
+                        moves.add((end_piece.row, end_piece.column))
+                        break
+                    elif end_piece.COLOR == self.COLOR:
+                        break
+                else:    # The square is off the board
+                    break
+        return moves
 
 
 class Queen(Piece):
