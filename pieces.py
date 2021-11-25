@@ -14,9 +14,6 @@ class Piece:
     def switch_selected_status(self):
         self.is_selected = not self.is_selected
 
-    def move(self):
-        pass
-
 
 class Pawn(Piece):
     TYPE = PAWN
@@ -24,8 +21,53 @@ class Pawn(Piece):
     def __init__(self, color, row=-1, column=-1):
         super().__init__(color, row, column)
 
-    def move(self):
-        pass
+    def get_pseudo_legal_moves(self, board):
+        moves = set()
+        if self.COLOR == WHITE:
+            self.check_forward_moves_white(board, moves)
+            self.check_captures_white(board, moves)
+        elif self.COLOR == BLACK:
+            self.check_forward_moves_black(board, moves)
+            self.check_captures_black(board, moves)
+        return moves
+
+    def check_forward_moves_white(self, board, moves):
+        if board[self.row - 1][self.column].TYPE == BLANK:  # One square
+            moves.add((self.row - 1, self.column))
+            # Needs to be nested, because need both squares to be empty
+            if self.row == 6 and board[self.row - 2][self.column].TYPE == BLANK:  # Two squares
+                moves.add((self.row - 2, self.column))
+
+    def check_forward_moves_black(self, board, moves):
+        if board[self.row + 1][self.column].TYPE == BLANK:  # One square
+            moves.add((self.row + 1, self.column))
+            # Needs to be nested, because need both squares to be empty
+            if self.row == 1 and board[self.row + 2][self.column].TYPE == BLANK:  # Two squares
+                moves.add((self.row + 2, self.column))
+
+    def check_captures_white(self, board, moves):
+        if self.column > 0:  # Left captures, not on edge of the board
+            left_diagonal_piece = board[self.row - 1][self.column - 1]
+            if left_diagonal_piece.TYPE != BLANK and left_diagonal_piece.COLOR == BLACK:
+                moves.add((left_diagonal_piece.row, left_diagonal_piece.column))
+        if self.column < len(board) - 1:  # Right captures
+            right_diagonal_piece = board[self.row - 1][self.column + 1]
+            if right_diagonal_piece.TYPE != BLANK and right_diagonal_piece.COLOR == BLACK:
+                moves.add((right_diagonal_piece.row, right_diagonal_piece.column))
+
+    def check_captures_black(self, board, moves):
+        if self.column > 0:  # Left captures
+            left_diagonal_piece = board[self.row + 1][self.column - 1]
+            if left_diagonal_piece.TYPE != BLANK and left_diagonal_piece.COLOR == WHITE:
+                moves.add((left_diagonal_piece.row, left_diagonal_piece.column))
+        if self.column < len(board) - 1:  # Right captures
+            right_diagonal_piece = board[self.row + 1][self.column + 1]
+            if right_diagonal_piece.TYPE != BLANK and right_diagonal_piece.COLOR == WHITE:
+                moves.add((right_diagonal_piece.row, right_diagonal_piece.column))
+
+
+
+
 
 
 class Knight(Piece):

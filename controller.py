@@ -69,7 +69,12 @@ class Keyboard:
     def handle_turn(self, clicked_piece):
         previous_selected_piece = self.model.selected_piece
         if previous_selected_piece is not None and previous_selected_piece.COLOR == self.model.color_to_move:
-            self.append_move(clicked_piece)
+            legal_moves = self.model.get_legal_moves()
+            if (clicked_piece.row, clicked_piece.column) in legal_moves:
+                self.process_legal_move(clicked_piece)
+
+    def process_legal_move(self, clicked_piece):
+        self.append_move(clicked_piece)
         if not clicked_piece.TYPE:
             # clicked_piece is a blank piece, the location of where to move
             self.move(clicked_piece)
@@ -126,11 +131,3 @@ class Keyboard:
                 piece.is_selected = False
 
         self.model.append_move(piece1_copy, piece2_copy)
-
-
-
-
-
-
-
-

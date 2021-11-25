@@ -37,6 +37,8 @@ def piece_name_to_type(piece_name: str) -> PieceType:
 
 def load_images():
     for piece in PIECE_TYPES:
+        if piece == BLANK:
+            continue
         for color in COLORS:
             IMAGES[color][piece] = pygame.transform.scale(
                 pygame.image.load(f'images/{piece_type_to_name(piece)}-{color_type_to_name(color)}.svg'),

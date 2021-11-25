@@ -64,4 +64,9 @@ class GameEngine:
     def append_move(self, piece1, piece2):
         self.move_log.append((piece1, piece2))
 
+    def get_legal_moves(self):
+        if self.selected_piece.COLOR == self.color_to_move:
+            # TODO: Check if we need to change this to legal_moves
+            return self.selected_piece.get_pseudo_legal_moves(self.board)
+
 
