@@ -158,7 +158,9 @@ class Queen(Piece):
         super().__init__(color, row, column)
 
     def get_pseudo_legal_moves(self, board):
-        return set()
+        rook = Rook(self.COLOR, self.row, self.column)
+        bishop = Bishop(self.COLOR, self.row, self.column)
+        return set.union(rook.get_pseudo_legal_moves(board), bishop.get_pseudo_legal_moves(board))
 
 
 class King(Piece):
