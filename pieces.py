@@ -88,7 +88,27 @@ class Bishop(Piece):
         super().__init__(color, row, column)
 
     def get_pseudo_legal_moves(self, board):
-        return set()
+        moves = set()
+
+        directions = ((-1, -1), (1, -1), (-1, 1), (1, 1))
+        opposite_color = not self.COLOR
+
+        for direction in directions:
+            for squares_moved in range(1, len(board)):
+                end_row = self.row + direction[0] * squares_moved
+                end_column = self.column + direction[1] * squares_moved
+                if on_the_board(end_row, end_column):
+                    end_piece = board[end_row][end_column]
+                    if end_piece.TYPE == BLANK:
+                        moves.add((end_piece.row, end_piece.column))
+                    elif end_piece.COLOR == opposite_color:
+                        moves.add((end_piece.row, end_piece.column))
+                        break
+                    elif end_piece.COLOR == self.COLOR:
+                        break
+                else:  # The square is off the board
+                    break
+        return moves
 
 
 class Rook(Piece):
