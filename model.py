@@ -82,29 +82,6 @@ class GameEngine:
     def append_move(self, piece1, piece2):
         self.move_log.append((piece1, piece2))
 
-    def undo_move(self):
-        selected_piece = self.selected_piece
-        if selected_piece is not None:
-            selected_piece.is_selected = not selected_piece.is_selected
-
-        self.color_to_move = not self.color_to_move
-        move_log = self.move_log
-        if len(move_log) > 0:
-            piece1, piece2 = move_log.pop()
-
-            for piece in (piece1, piece2):
-                if piece is not None:
-                    self.board[piece.row][piece.column] = piece
-                    if piece.TYPE == KING and piece.COLOR == WHITE:
-                        self.white_king = piece
-                    elif piece.TYPE == KING and piece.COLOR == BLACK:
-                        self.black_king = piece
-
-        # # If the move log is empty, it means we are at the first turn of the game.
-        # # White always moves first
-        if len(move_log) == 0:
-            self.color_to_move = True
-
     def get_pseudo_legal_moves(self):
         if self.selected_piece.COLOR == self.color_to_move:
             # TODO: Check if we need to change this to legal_moves

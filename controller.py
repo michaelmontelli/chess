@@ -40,7 +40,7 @@ class Keyboard:
                         self.event_manager.post(QuitEvent())
                     elif event.key == pygame.K_LEFT:
                         if len(self.model.move_log) > 0:
-                            self.model.undo_move()
+                            self.undo_move()
                         self.event_manager.post(InputEvent(None))
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     pos = pygame.mouse.get_pos()
@@ -114,3 +114,26 @@ class Keyboard:
                 piece.is_selected = False
 
         self.model.append_move(piece1_copy, piece2_copy)
+
+    def undo_move(self):
+        selected_piece = self.model.selected_piece
+        if selected_piece is not None:
+            selected_piece.is_selected = not selected_piece.is_selected
+
+        self.model.color_to_move = not self.model.color_to_move
+        move_log = self.model.move_log
+        if len(move_log) > 0:
+            piece1, piece2 = move_log.pop()
+
+            for piece in (piece1, piece2):
+                if piece is not None:
+                    self.model.board[piece.row][piece.column] = piece
+                    if piece.TYPE == KING and piece.COLOR == WHITE:
+                        self.model.white_king = piece
+                    elif piece.TYPE == KING and piece.COLOR == BLACK:
+                        self.model.black_king = piece
+
+        # # If the move log is empty, it means we are at the first turn of the game.
+        # # White always moves first
+        if len(move_log) == 0:
+            self.model.color_to_move = True
