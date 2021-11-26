@@ -215,17 +215,18 @@ class King(Piece):
                     moves.add((end_piece.row, end_piece.column))
         return moves
 
-    def update_check_status(self, board):
-        cardinal_status = self.update_check_status_from_cardinal_directions(board)
-        diagonal_status = self.update_check_status_from_diagonal_directions(board)
-        knight_status = self.update_check_status_from_knights(board)
+    def get_check_status(self, board):
+        in_check = False
+        cardinal_status = self._get_check_status_from_cardinal_directions(board)
+        diagonal_status = self._get_check_status_from_diagonal_directions(board)
+        knight_status = self._get_check_status_from_knights(board)
 
         if any([cardinal_status, diagonal_status, knight_status]):
-            self.in_check = True
-        else:
-            self.in_check = False
+            in_check = True
 
-    def update_check_status_from_cardinal_directions(self, board):
+        return in_check
+
+    def _get_check_status_from_cardinal_directions(self, board):
         directions = [(-1, 0), (0, -1), (1, 0), (0, 1)]
         opposite_color = not self.COLOR
         for direction in directions:
@@ -247,7 +248,7 @@ class King(Piece):
                         break
         return False
 
-    def update_check_status_from_diagonal_directions(self, board):
+    def _get_check_status_from_diagonal_directions(self, board):
         directions = [(-1, -1), (1, -1), (-1, 1), (1, 1)]
         opposite_color = not self.COLOR
         for direction in directions:
@@ -271,7 +272,7 @@ class King(Piece):
                         break
         return False
 
-    def update_check_status_from_knights(self, board):
+    def _get_check_status_from_knights(self, board):
         directions = [(-1, -2), (-1, 2), (1, -2), (1, 2), (-2, -1), (-2, 1), (2, -1), (2, 1)]
         opposite_color = not self.COLOR
 

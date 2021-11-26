@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 import pygame
 from eventmanager import *
 from board import Board
@@ -72,38 +74,26 @@ class GameEngine:
             # TODO: Check if we need to change this to legal_moves
             return self.selected_piece.get_pseudo_legal_moves(self.board)
 
-    # def get_legal_moves(self):
-    #     # if self.selected_piece.COLOR == self.color_to_move:
-    #     #     return self.selected_piece.get_legal_moves(self.board)
-    #     self.get_check_status()
+    def get_legal_moves(self):
+        pseudo_legal_moves = self.get_pseudo_legal_moves()
+        board_copy = deepcopy(self.board)
+        for move in pseudo_legal_moves:
+            board = self.try_pseudo_legal_move(board_copy, move)
 
-    # def get_check_status(self):
-    # #     if self.color_to_move == WHITE:
-    # #         self._get_check_status_white()
-    # #     elif self.color_to_move == BLACK:
-    # #         self._get_check_status_black()
-    # #
-    # # def _get_check_status_white(self):
-    # #     directions = [(-1, 0), (0, -1), (1, 0), (0, 1), (-1, -1), (1, -1), (-1, 1), (1, 1)]
-    # #
-    # # def _get_check_status_black(self):
-    # #     pass
-    #     if self.color_to_move == WHITE:
-    #         self.white_king.update_check_status(self.board)
-    #     elif self.color_to_move == BLACK:
-    #         self.black_king.update_check_status(self.board)
 
-    def update_check_status(self):
-    #     if self.color_to_move == WHITE:
-    #         self._get_check_status_white()
-    #     elif self.color_to_move == BLACK:
-    #         self._get_check_status_black()
-    #
-    # def _get_check_status_white(self):
-    #     directions = [(-1, 0), (0, -1), (1, 0), (0, 1), (-1, -1), (1, -1), (-1, 1), (1, 1)]
-    #
-    # def _get_check_status_black(self):
-    #     pass
-        self.white_king.update_check_status(self.board)
-        self.black_king.update_check_status(self.board)
+    def get_check_status(self):
+        white_king_check_status = self.white_king.get_check_status(self.board)
+        black_king_check_status = self.black_king.get_check_status(self.board)
+        return white_king_check_status, black_king_check_status
+
+    def get_check_status(self, board):
+        white_king_check_status = self.white_king.get_check_status(board)
+        black_king_check_status = self.black_king.get_check_status(board)
+        return white_king_check_status, black_king_check_status
+
+    def try_pseudo_legal_move(self, board_copy, move):
+
+
+
+
 
