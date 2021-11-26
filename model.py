@@ -82,6 +82,29 @@ class GameEngine:
     def append_move(self, piece1, piece2):
         self.move_log.append((piece1, piece2))
 
+    def undo_move(self):
+        selected_piece = self.selected_piece
+        if selected_piece is not None:
+            selected_piece.is_selected = not selected_piece.is_selected
+
+        self.color_to_move = not self.color_to_move
+        move_log = self.move_log
+        if len(move_log) > 0:
+            piece1, piece2 = move_log.pop()
+
+            for piece in (piece1, piece2):
+                if piece is not None:
+                    self.board[piece.row][piece.column] = piece
+                    if piece.TYPE == KING and piece.COLOR == WHITE:
+                        self.white_king = piece
+                    elif piece.TYPE == KING and piece.COLOR == BLACK:
+                        self.black_king = piece
+
+        # # If the move log is empty, it means we are at the first turn of the game.
+        # # White always moves first
+        if len(move_log) == 0:
+            self.color_to_move = True
+
     def get_pseudo_legal_moves(self):
         if self.selected_piece.COLOR == self.color_to_move:
             # TODO: Check if we need to change this to legal_moves
@@ -90,17 +113,13 @@ class GameEngine:
     def get_legal_moves(self):
         legal_moves = set()
         pseudo_legal_moves = self.get_pseudo_legal_moves()
-        print("pseudo: ", pseudo_legal_moves)
-        board_copy = deepcopy(self.board)
-        white_king_row, white_king_column = self.white_king.row, self.white_king.column
-        black_king_row, black_king_column = self.black_king.row, self.black_king.column
-        white_king = board_copy[white_king_row][white_king_column]
-        black_king = board_copy[black_king_row][black_king_column]
         for move in pseudo_legal_moves:
-            board = self.try_pseudo_legal_move(board_copy, move)
-            white_king_check_status, black_king_check_status = self.get_check_status_with_board_and_kings(board,
+            board_copy, white_king, black_king = self.copy_board_and_kings()
+            self.try_pseudo_legal_move(board_copy, move)
+            white_king_check_status, black_king_check_status = self.get_check_status_with_board_and_kings(board_copy,
                                                                                                           white_king,
                                                                                                           black_king)
+            print("color to move: ", self.color_to_move)
             if self.color_to_move == WHITE:
                 in_check = white_king_check_status
             else:
@@ -108,6 +127,7 @@ class GameEngine:
 
             if not in_check:
                 legal_moves.add(move)
+            self.undo_pseudo_legal_move(board_copy, move)
 
         return legal_moves
 
@@ -145,12 +165,16 @@ class GameEngine:
         else:
             self.capture_with_board(target_piece, selected_piece_copy, board_copy)
 
-        return board_copy
+    def undo_pseudo_legal_move(self, board_copy, move):
+        pass
 
+    def copy_board_and_kings(self):
+        board_copy = deepcopy(self.board)
 
+        white_king_row, white_king_column = self.white_king.row, self.white_king.column
+        black_king_row, black_king_column = self.black_king.row, self.black_king.column
 
+        white_king = board_copy[white_king_row][white_king_column]
+        black_king = board_copy[black_king_row][black_king_column]
 
-
-
-
-
+        return board_copy, white_king, black_king
