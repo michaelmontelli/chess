@@ -68,30 +68,21 @@ class Keyboard:
     def handle_turn(self, clicked_piece):
         previous_selected_piece = self.model.selected_piece
         if previous_selected_piece is not None and previous_selected_piece.COLOR == self.model.color_to_move:
-            legal_moves = self.model.get_pseudo_legal_moves()    # TODO: Change to legal moves()
+            legal_moves = self.model.get_legal_moves()    # TODO: Change to legal moves()
             # self.model.get_legal_moves()    # TODO: Changed when done implementing
+            print(legal_moves)
             if (clicked_piece.row, clicked_piece.column) in legal_moves:
-                self.process_legal_move(clicked_piece)
+                self.append_move(clicked_piece)
+                self.process_move(clicked_piece)
+                self.model.update_check_status()
 
-    def process_legal_move(self, clicked_piece):
-        self.append_move(clicked_piece)
+    def process_move(self, clicked_piece):
         if not clicked_piece.TYPE:
             # clicked_piece is a blank piece, the location of where to move
             self.move(clicked_piece)
         else:
             # clicked_piece is a piece of the opposite color
             self.capture(clicked_piece)
-        white_king_check_status, black_king_check_status = self.model.get_check_status()
-
-        print(self.model.color_to_move)
-        print("White King: ")
-        print("-------------")
-        print(f"Location: {self.model.white_king.row}, {self.model.white_king.column}")
-        print(f"In Check: {white_king_check_status}")
-        print("Black King: ")
-        print("-------------")
-        print(f"Location: {self.model.black_king.row}, {self.model.black_king.column}")
-        print(f"In Check: {black_king_check_status}")
 
     def move(self, clicked_piece):
         previous_selected_piece = self.model.selected_piece

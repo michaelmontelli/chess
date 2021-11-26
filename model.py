@@ -1,5 +1,5 @@
 from copy import deepcopy
-
+from constants import *
 import pygame
 from eventmanager import *
 from board import Board
@@ -60,11 +60,24 @@ class GameEngine:
         self.board[piece1.row][piece1.column] = piece1
         self.board[piece2.row][piece2.column] = piece2
 
+    def swap_with_board(self, piece1, piece2, board):
+        piece1.row, piece2.row = piece2.row, piece1.row
+        piece1.column, piece2.column = piece2.column, piece1.column
+
+        board[piece1.row][piece1.column] = piece1
+        board[piece2.row][piece2.column] = piece2
+
     def capture(self, captured_piece, taker_piece):
         self.board[taker_piece.row][taker_piece.column] = Blank(taker_piece.row, taker_piece.column)
 
         taker_piece.row, taker_piece.column = captured_piece.row, captured_piece.column
         self.board[taker_piece.row][taker_piece.column] = taker_piece
+
+    def capture_with_board(self, captured_piece, taker_piece, board):
+        board[taker_piece.row][taker_piece.column] = Blank(taker_piece.row, taker_piece.column)
+
+        taker_piece.row, taker_piece.column = captured_piece.row, captured_piece.column
+        board[taker_piece.row][taker_piece.column] = taker_piece
 
     def append_move(self, piece1, piece2):
         self.move_log.append((piece1, piece2))
@@ -75,23 +88,67 @@ class GameEngine:
             return self.selected_piece.get_pseudo_legal_moves(self.board)
 
     def get_legal_moves(self):
+        legal_moves = set()
         pseudo_legal_moves = self.get_pseudo_legal_moves()
+        print("pseudo: ", pseudo_legal_moves)
         board_copy = deepcopy(self.board)
+        white_king_row, white_king_column = self.white_king.row, self.white_king.column
+        black_king_row, black_king_column = self.black_king.row, self.black_king.column
+        white_king = board_copy[white_king_row][white_king_column]
+        black_king = board_copy[black_king_row][black_king_column]
         for move in pseudo_legal_moves:
             board = self.try_pseudo_legal_move(board_copy, move)
+            white_king_check_status, black_king_check_status = self.get_check_status_with_board_and_kings(board,
+                                                                                                          white_king,
+                                                                                                          black_king)
+            if self.color_to_move == WHITE:
+                in_check = white_king_check_status
+            else:
+                in_check = black_king_check_status
 
+            if not in_check:
+                legal_moves.add(move)
+
+        return legal_moves
 
     def get_check_status(self):
         white_king_check_status = self.white_king.get_check_status(self.board)
         black_king_check_status = self.black_king.get_check_status(self.board)
         return white_king_check_status, black_king_check_status
 
-    def get_check_status(self, board):
-        white_king_check_status = self.white_king.get_check_status(board)
-        black_king_check_status = self.black_king.get_check_status(board)
+    def get_check_status_with_board_and_kings(self, board, white_king, black_king):
+        white_king_check_status = white_king.get_check_status(board)
+        black_king_check_status = black_king.get_check_status(board)
         return white_king_check_status, black_king_check_status
 
+    def update_check_status(self):
+        self.white_king.in_check, self.black_king.in_check = self.get_check_status()
+
+        print(self.color_to_move)
+        print("White King: ")
+        print("-------------")
+        print(f"Location: {self.white_king.row}, {self.white_king.column}")
+        print(f"In Check: {self.white_king.in_check}")
+        print("Black King: ")
+        print("-------------")
+        print(f"Location: {self.black_king.row}, {self.black_king.column}")
+        print(f"In Check: {self.black_king.in_check}")
+
     def try_pseudo_legal_move(self, board_copy, move):
+        target_piece_row, target_piece_column = move
+        target_piece = board_copy[target_piece_row][target_piece_column]
+
+        selected_piece_row, selected_piece_column = self.selected_piece.row, self.selected_piece.column
+        selected_piece_copy = board_copy[selected_piece_row][selected_piece_column]
+        if target_piece.TYPE == BLANK:
+            self.swap_with_board(target_piece, selected_piece_copy, board_copy)
+        else:
+            self.capture_with_board(target_piece, selected_piece_copy, board_copy)
+
+        return board_copy
+
+
+
 
 
 
