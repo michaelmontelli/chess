@@ -83,6 +83,18 @@ class Pawn(Piece):
             if right_diagonal_piece.TYPE != BLANK and right_diagonal_piece.COLOR == WHITE:
                 moves.add((right_diagonal_piece.row, right_diagonal_piece.column))
 
+    def should_promote(self):
+        should_promote = False
+
+        if (self.COLOR == WHITE and self.row == 0) or (self.COLOR == BLACK and self.row == 8):
+            should_promote = True
+
+        return should_promote
+
+    def transform_to_queen(self):
+        queen = Queen(self.COLOR, self.row, self.column)
+        return queen
+
 
 class Knight(Piece):
     TYPE = KNIGHT

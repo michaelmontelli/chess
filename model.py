@@ -53,12 +53,16 @@ class GameEngine:
             new_tick = TickEvent()
             self.event_manager.post(new_tick)
 
-    def swap(self, piece1, piece2):
-        piece1.row, piece2.row = piece2.row, piece1.row
-        piece1.column, piece2.column = piece2.column, piece1.column
+    def swap(self, blank_piece, selected_piece):
+        blank_piece.row, selected_piece.row = selected_piece.row, blank_piece.row
+        blank_piece.column, selected_piece.column = selected_piece.column, blank_piece.column
 
-        self.board[piece1.row][piece1.column] = piece1
-        self.board[piece2.row][piece2.column] = piece2
+        self.board[blank_piece.row][blank_piece.column] = blank_piece
+
+        if selected_piece.TYPE == PAWN and selected_piece.should_promote():
+            selected_piece = selected_piece.transform_to_queen()
+
+        self.board[selected_piece.row][selected_piece.column] = selected_piece
 
     def swap_with_board(self, piece1, piece2, board):
         piece1.row, piece2.row = piece2.row, piece1.row
@@ -71,6 +75,10 @@ class GameEngine:
         self.board[taker_piece.row][taker_piece.column] = Blank(taker_piece.row, taker_piece.column)
 
         taker_piece.row, taker_piece.column = captured_piece.row, captured_piece.column
+
+        if taker_piece.TYPE == PAWN and taker_piece.should_promote():
+            taker_piece = taker_piece.transform_to_queen()
+
         self.board[taker_piece.row][taker_piece.column] = taker_piece
 
     def capture_with_board(self, captured_piece, taker_piece, board):
