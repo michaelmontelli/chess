@@ -95,6 +95,25 @@ class Pawn(Piece):
         queen = Queen(self.COLOR, self.row, self.column)
         return queen
 
+    def moved_two_squares(self, blank_piece_row):
+        return abs(self.row - blank_piece_row) == 2
+
+    def update_pseudo_legal_moves_for_en_passant_white(self, pseudo_legal_moves, board, en_passant_move):
+        left_diagonal_square = (self.row - 1, self.column - 1) if self.column > 0 else ()
+        right_diagonal_square = (self.row - 1, self.column + 1) if self.column < len(board) - 1 else ()
+        if en_passant_move in {left_diagonal_square, right_diagonal_square}:
+            pseudo_legal_moves.add(en_passant_move)
+
+        return pseudo_legal_moves
+
+    def update_pseudo_legal_moves_for_en_passant_black(self, pseudo_legal_moves, board, en_passant_move):
+        left_diagonal_square = (self.row + 1, self.column - 1) if self.column > 0 else ()
+        right_diagonal_square = (self.row + 1, self.column + 1) if self.column < len(board) - 1 else ()
+        if en_passant_move in {left_diagonal_square, right_diagonal_square}:
+            pseudo_legal_moves.add(en_passant_move)
+
+        return pseudo_legal_moves
+
 
 class Knight(Piece):
     TYPE = KNIGHT

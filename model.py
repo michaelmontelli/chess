@@ -9,6 +9,13 @@ COLORS = [WHITE, BLACK] = [True, False]
 COLOR_NAMES = ["black", "white"]
 
 
+def get_square_behind(piece):
+    if piece.COLOR == WHITE:
+        return piece.row + 1, piece.column
+    elif piece.COLOR == BLACK:
+        return piece.row - 1, piece.column
+
+
 class GameEngine:
     """
     Tracks the game state.
@@ -33,6 +40,11 @@ class GameEngine:
         self.white_king = self.board[7][4]
         self.black_king = self.board[0][4]
 
+        self.en_passant_possible_white = False
+        self.en_passant_move_white = ()
+        self.en_passant_possible_black = False
+        self.en_passant_move_black = ()
+
     def notify(self, event):
         """
         Called by an event in the message queue.
@@ -54,46 +66,79 @@ class GameEngine:
             self.event_manager.post(new_tick)
 
     def swap(self, blank_piece, selected_piece):
+        if self.is_en_passant_move(blank_piece, selected_piece):
+            self.capture_en_passant(blank_piece, selected_piece)
+            return
+
         blank_piece.row, selected_piece.row = selected_piece.row, blank_piece.row
         blank_piece.column, selected_piece.column = selected_piece.column, blank_piece.column
 
         self.board[blank_piece.row][blank_piece.column] = blank_piece
 
+        # Pawn Promotion
         if selected_piece.TYPE == PAWN and selected_piece.should_promote():
             selected_piece = selected_piece.transform_to_queen()
 
+        self.update_en_passant_status(blank_piece.row, selected_piece)
+
         self.board[selected_piece.row][selected_piece.column] = selected_piece
 
-    def swap_with_board(self, piece1, piece2, board):
-        piece1.row, piece2.row = piece2.row, piece1.row
-        piece1.column, piece2.column = piece2.column, piece1.column
+    def update_en_passant_status(self, blank_piece_row, selected_piece):
+        if selected_piece.TYPE == PAWN and selected_piece.moved_two_squares(blank_piece_row):
+            if selected_piece.COLOR == WHITE:
+                self.en_passant_possible_black = True
+                self.en_passant_move_black = get_square_behind(selected_piece)
+            elif selected_piece.COLOR == BLACK:
+                self.en_passant_possible_white = True
+                self.en_passant_move_white = get_square_behind(selected_piece)
 
-        board[piece1.row][piece1.column] = piece1
-        board[piece2.row][piece2.column] = piece2
+    @staticmethod
+    def swap_with_board(blank_piece, selected_piece, board):
+        blank_piece.row, selected_piece.row = selected_piece.row, blank_piece.row
+        blank_piece.column, selected_piece.column = selected_piece.column, blank_piece.column
+
+        board[blank_piece.row][blank_piece.column] = blank_piece
+
+        # Pawn Promotion
+        if selected_piece.TYPE == PAWN and selected_piece.should_promote():
+            selected_piece = selected_piece.transform_to_queen()
+
+        board[selected_piece.row][selected_piece.column] = selected_piece
 
     def capture(self, captured_piece, taker_piece):
         self.board[taker_piece.row][taker_piece.column] = Blank(taker_piece.row, taker_piece.column)
 
         taker_piece.row, taker_piece.column = captured_piece.row, captured_piece.column
 
+        # Pawn Promotion
         if taker_piece.TYPE == PAWN and taker_piece.should_promote():
             taker_piece = taker_piece.transform_to_queen()
 
         self.board[taker_piece.row][taker_piece.column] = taker_piece
 
-    def capture_with_board(self, captured_piece, taker_piece, board):
+    @staticmethod
+    def capture_with_board(captured_piece, taker_piece, board):
         board[taker_piece.row][taker_piece.column] = Blank(taker_piece.row, taker_piece.column)
 
         taker_piece.row, taker_piece.column = captured_piece.row, captured_piece.column
+
+        # Pawn Promotion
+        if taker_piece.TYPE == PAWN and taker_piece.should_promote():
+            taker_piece = taker_piece.transform_to_queen()
+
         board[taker_piece.row][taker_piece.column] = taker_piece
 
     def append_move(self, piece1, piece2):
         self.move_log.append((piece1, piece2))
 
     def get_pseudo_legal_moves(self):
-        if self.selected_piece.COLOR == self.color_to_move:
-            # TODO: Check if we need to change this to legal_moves
-            return self.selected_piece.get_pseudo_legal_moves(self.board)
+        pseudo_legal_moves = self.selected_piece.get_pseudo_legal_moves(self.board)
+
+        if self.selected_piece.TYPE == PAWN and self.is_en_passant_possible():
+            pseudo_legal_moves = self.update_pseudo_legal_moves_for_en_passant(pseudo_legal_moves,
+                                                                               self.selected_piece,
+                                                                               self.board)
+        return pseudo_legal_moves
 
     def get_legal_moves(self):
         legal_moves = set()
@@ -121,7 +166,8 @@ class GameEngine:
         black_king_check_status = self.black_king.get_check_status(self.board)
         return white_king_check_status, black_king_check_status
 
-    def get_check_status_with_board_and_kings(self, board, white_king, black_king):
+    @staticmethod
+    def get_check_status_with_board_and_kings(board, white_king, black_king):
         white_king_check_status = white_king.get_check_status(board)
         black_king_check_status = black_king.get_check_status(board)
         return white_king_check_status, black_king_check_status
@@ -163,3 +209,52 @@ class GameEngine:
         black_king = board_copy[black_king_row][black_king_column]
 
         return board_copy, white_king, black_king
+
+    def update_pseudo_legal_moves_for_en_passant(self, pseudo_legal_moves, selected_piece, board):
+        if selected_piece.COLOR == WHITE and self.en_passant_possible_white:
+            pseudo_legal_moves = selected_piece.update_pseudo_legal_moves_for_en_passant_white(pseudo_legal_moves,
+                                                                                               board,
+                                                                                               self.en_passant_move_white)
+        elif selected_piece.COLOR == BLACK and self.en_passant_possible_black:
+            pseudo_legal_moves = selected_piece.update_pseudo_legal_moves_for_en_passant_black(pseudo_legal_moves,
+                                                                                               board,
+                                                                                               self.en_passant_move_black)
+        return pseudo_legal_moves
+
+    def is_en_passant_possible(self):
+        return self.en_passant_possible_white or self.en_passant_possible_black
+
+    def is_en_passant_move(self, blank_piece, selected_piece):
+        is_en_passant_move = False
+        if selected_piece.COLOR == WHITE:
+            if selected_piece.TYPE == PAWN and (blank_piece.row, blank_piece.column) == self.en_passant_move_white:
+                is_en_passant_move = True
+
+        elif selected_piece.COLOR == BLACK:
+            if selected_piece.TYPE == PAWN and (blank_piece.row, blank_piece.column) == self.en_passant_move_black:
+                is_en_passant_move = True
+
+        return is_en_passant_move
+
+    def capture_en_passant(self, blank_piece, taker_piece):
+        captured_piece = self.get_piece_in_front(blank_piece)
+
+        self.board[taker_piece.row][taker_piece.column] = Blank(taker_piece.row, taker_piece.column)
+        self.board[captured_piece.row][captured_piece.column] = Blank(captured_piece.row, captured_piece.column)
+
+        taker_piece.row, taker_piece.column = blank_piece.row, blank_piece.column
+
+        # Pawn Promotion
+        if taker_piece.TYPE == PAWN and taker_piece.should_promote():
+            taker_piece = taker_piece.transform_to_queen()
+
+        self.board[taker_piece.row][taker_piece.column] = taker_piece
+
+    def get_piece_in_front(self, blank_piece):
+        if self.color_to_move == WHITE:
+            captured_piece = self.board[blank_piece.row + 1][blank_piece.column]
+        elif self.color_to_move == BLACK:
+            captured_piece = self.board[blank_piece.row - 1][blank_piece.column]
+        return captured_piece
+
+

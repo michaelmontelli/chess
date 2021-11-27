@@ -56,6 +56,8 @@ class Keyboard:
             self.select_piece(clicked_piece)
         else:    # Player wants to move piece to the selected blank square or capture
             self.handle_turn(clicked_piece)
+            print("en_passant: ", self.model.en_passant_possible_black)
+            print(self.model.en_passant_possible_white or self.model.en_passant_possible_black)
 
     def select_piece(self, piece):
         previous_selected_piece = self.model.selected_piece
