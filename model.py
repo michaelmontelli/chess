@@ -36,6 +36,7 @@ class GameEngine:
         self.selected_piece = None
         self.color_to_move = WHITE
         self.move_log = []
+        self.en_passant_move_log = []    # Did an en passant move happen?
 
         self.white_king = self.board[7][4]
         self.black_king = self.board[0][4]
@@ -128,8 +129,9 @@ class GameEngine:
 
         board[taker_piece.row][taker_piece.column] = taker_piece
 
-    def append_move(self, piece1, piece2):
-        self.move_log.append((piece1, piece2))
+    def append_move(self, selected_piece, clicked_piece):
+        self.move_log.append((selected_piece, clicked_piece))
+        self.en_passant_move_log.append(self.is_en_passant_move(clicked_piece, selected_piece))
 
     def get_pseudo_legal_moves(self):
         pseudo_legal_moves = self.selected_piece.get_pseudo_legal_moves(self.board)

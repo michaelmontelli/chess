@@ -75,8 +75,8 @@ class Keyboard:
             legal_moves = self.model.get_legal_moves()    # TODO: Change to legal moves()
             # self.model.get_legal_moves()    # TODO: Changed when done implementing
             if (clicked_piece.row, clicked_piece.column) in legal_moves:
-                self.append_move(clicked_piece)
                 self.process_move(clicked_piece)
+                self.append_move(clicked_piece)
                 self.model.update_check_status()
 
     def process_move(self, clicked_piece):
@@ -105,17 +105,16 @@ class Keyboard:
         self.model.color_to_move = not self.model.color_to_move
 
     def append_move(self, clicked_piece):
-        piece1 = self.model.selected_piece
-        piece2 = clicked_piece
+        selected_piece = self.model.selected_piece
 
-        piece1_copy = deepcopy(piece1)
-        piece2_copy = deepcopy(piece2)
+        selected_piece_copy = deepcopy(selected_piece)
+        clicked_piece_copy = deepcopy(clicked_piece)
 
-        for piece in (piece1_copy, piece2_copy):
+        for piece in (selected_piece_copy, clicked_piece_copy):
             if piece is not None:
                 piece.is_selected = False
 
-        self.model.append_move(piece1_copy, piece2_copy)
+        self.model.append_move(selected_piece_copy, clicked_piece_copy)
 
     def undo_move(self):
         selected_piece = self.model.selected_piece
@@ -139,3 +138,6 @@ class Keyboard:
         # # White always moves first
         if len(move_log) == 0:
             self.model.color_to_move = True
+
+        # TODO: Make sure correct
+        self.model.update_check_status()
