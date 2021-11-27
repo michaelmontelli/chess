@@ -75,29 +75,31 @@ class Keyboard:
             legal_moves = self.model.get_legal_moves()    # TODO: Change to legal moves()
             # self.model.get_legal_moves()    # TODO: Changed when done implementing
             if (clicked_piece.row, clicked_piece.column) in legal_moves:
-                self.process_move(clicked_piece)
                 self.append_move(clicked_piece)
+                self.process_move(clicked_piece)
                 self.model.update_check_status()
 
     def process_move(self, clicked_piece):
-        if not clicked_piece.TYPE:
+        if clicked_piece.TYPE == BLANK:
             # clicked_piece is a blank piece, the location of where to move
             self.move(clicked_piece)
         else:
             # clicked_piece is a piece of the opposite color
             self.capture(clicked_piece)
+        self.deselect_previous_piece(self.model.selected_piece)
 
     def move(self, clicked_piece):
         previous_selected_piece = self.model.selected_piece
         if previous_selected_piece is not None and previous_selected_piece.is_selected:
-            self.model.swap(clicked_piece, previous_selected_piece)
-            self.deselect_previous_piece(previous_selected_piece)
+            if self.model.is_en_passant_move(clicked_piece, previous_selected_piece):
+                self.model.capture_en_passant(clicked_piece, previous_selected_piece)
+            else:
+                self.model.swap(clicked_piece, previous_selected_piece)
 
     def capture(self, clicked_piece):
         previous_selected_piece = self.model.selected_piece
         if previous_selected_piece is not None and previous_selected_piece.is_selected:
             self.model.capture(clicked_piece, previous_selected_piece)
-            self.deselect_previous_piece(previous_selected_piece)
 
     def deselect_previous_piece(self, previous_selected_piece):
         previous_selected_piece.is_selected = False
@@ -109,6 +111,8 @@ class Keyboard:
 
         selected_piece_copy = deepcopy(selected_piece)
         clicked_piece_copy = deepcopy(clicked_piece)
+        print("selected_piece type: ", selected_piece_copy.TYPE)
+        print("clicked_piece type: ", clicked_piece_copy.TYPE)
 
         for piece in (selected_piece_copy, clicked_piece_copy):
             if piece is not None:
@@ -122,22 +126,39 @@ class Keyboard:
             selected_piece.is_selected = not selected_piece.is_selected
 
         self.model.color_to_move = not self.model.color_to_move
-        move_log = self.model.move_log
-        if len(move_log) > 0:
-            piece1, piece2 = move_log.pop()
 
-            for piece in (piece1, piece2):
-                if piece is not None:
-                    self.model.board[piece.row][piece.column] = piece
-                    if piece.TYPE == KING and piece.COLOR == WHITE:
-                        self.model.white_king = piece
-                    elif piece.TYPE == KING and piece.COLOR == BLACK:
-                        self.model.black_king = piece
+        if len(self.model.move_log) > 0:
+            en_passant_move = self.model.en_passant_move_log.pop()
+            if not en_passant_move:
+                self.regular_replace_pieces()
+            else:
+                self.en_passant_replace_pieces()
 
         # # If the move log is empty, it means we are at the first turn of the game.
         # # White always moves first
-        if len(move_log) == 0:
+        if len(self.model.move_log) == 0:
             self.model.color_to_move = True
 
         # TODO: Make sure correct
         self.model.update_check_status()
+
+    def regular_replace_pieces(self):
+        selected_piece, clicked_piece = self.model.move_log.pop()
+        self.place_move_on_board(clicked_piece, selected_piece)
+
+    def en_passant_replace_pieces(self):
+        taker_piece, blank_piece = self.model.move_log.pop()
+        taker_piece, captured_piece = self.model.move_log.pop()
+
+        self.place_move_on_board(taker_piece, blank_piece)
+        self.place_move_on_board(taker_piece, captured_piece)
+
+    def place_move_on_board(self, selected_piece, clicked_piece):
+        for piece in (selected_piece, clicked_piece):
+            if piece is not None:
+                self.model.board[piece.row][piece.column] = piece
+                if piece.TYPE == KING and piece.COLOR == WHITE:
+                    self.model.white_king = piece
+                elif piece.TYPE == KING and piece.COLOR == BLACK:
+                    self.model.black_king = piece
+

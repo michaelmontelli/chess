@@ -67,10 +67,6 @@ class GameEngine:
             self.event_manager.post(new_tick)
 
     def swap(self, blank_piece, selected_piece):
-        if self.is_en_passant_move(blank_piece, selected_piece):
-            self.capture_en_passant(blank_piece, selected_piece)
-            return
-
         blank_piece.row, selected_piece.row = selected_piece.row, blank_piece.row
         blank_piece.column, selected_piece.column = selected_piece.column, blank_piece.column
 
@@ -130,8 +126,13 @@ class GameEngine:
         board[taker_piece.row][taker_piece.column] = taker_piece
 
     def append_move(self, selected_piece, clicked_piece):
+        is_en_passant_move = self.is_en_passant_move(clicked_piece, selected_piece)
+        self.en_passant_move_log.append(is_en_passant_move)
+
+        if is_en_passant_move:
+            self.move_log.append((selected_piece, self.get_piece_in_front(clicked_piece)))
         self.move_log.append((selected_piece, clicked_piece))
-        self.en_passant_move_log.append(self.is_en_passant_move(clicked_piece, selected_piece))
+        print("ep move log: ", self.en_passant_move_log)
 
     def get_pseudo_legal_moves(self):
         pseudo_legal_moves = self.selected_piece.get_pseudo_legal_moves(self.board)
@@ -238,19 +239,24 @@ class GameEngine:
 
         return is_en_passant_move
 
+    # def capture_en_passant(self, blank_piece, taker_piece):
+    #     captured_piece = self.get_piece_in_front(blank_piece)
+    #
+    #     self.board[taker_piece.row][taker_piece.column] = Blank(taker_piece.row, taker_piece.column)
+    #     self.board[captured_piece.row][captured_piece.column] = Blank(captured_piece.row, captured_piece.column)
+    #
+    #     taker_piece.row, taker_piece.column = blank_piece.row, blank_piece.column
+    #
+    #     # Pawn Promotion
+    #     if taker_piece.TYPE == PAWN and taker_piece.should_promote():
+    #         taker_piece = taker_piece.transform_to_queen()
+    #
+    #     self.board[taker_piece.row][taker_piece.column] = taker_piece
+
     def capture_en_passant(self, blank_piece, taker_piece):
         captured_piece = self.get_piece_in_front(blank_piece)
-
-        self.board[taker_piece.row][taker_piece.column] = Blank(taker_piece.row, taker_piece.column)
-        self.board[captured_piece.row][captured_piece.column] = Blank(captured_piece.row, captured_piece.column)
-
-        taker_piece.row, taker_piece.column = blank_piece.row, blank_piece.column
-
-        # Pawn Promotion
-        if taker_piece.TYPE == PAWN and taker_piece.should_promote():
-            taker_piece = taker_piece.transform_to_queen()
-
-        self.board[taker_piece.row][taker_piece.column] = taker_piece
+        self.capture(captured_piece, taker_piece)
+        self.swap(blank_piece, taker_piece)
 
     def get_piece_in_front(self, blank_piece):
         if self.color_to_move == WHITE:
