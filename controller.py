@@ -72,9 +72,10 @@ class Keyboard:
     def handle_turn(self, clicked_piece):
         previous_selected_piece = self.model.selected_piece
         if previous_selected_piece is not None and previous_selected_piece.COLOR == self.model.color_to_move:
-            legal_moves = self.model.get_legal_moves()    # TODO: Change to legal moves()
-            # self.model.get_legal_moves()    # TODO: Changed when done implementing
+            legal_moves = self.model.get_legal_moves()
+
             if (clicked_piece.row, clicked_piece.column) in legal_moves:
+                self.model.update_castling_rights(self.model.selected_piece)
                 self.append_move(clicked_piece)
                 self.process_move(clicked_piece)
                 self.model.update_check_status()

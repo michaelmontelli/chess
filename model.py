@@ -4,6 +4,7 @@ import pygame
 from eventmanager import *
 from board import Board
 from pieces import Blank
+from castling_rights import CastlingRights
 
 COLORS = [WHITE, BLACK] = [True, False]
 COLOR_NAMES = ["black", "white"]
@@ -37,6 +38,8 @@ class GameEngine:
         self.color_to_move = WHITE
         self.move_log = []
         self.en_passant_move_log = []    # Did an en passant move happen?
+        self.castle_move_log = []    # Did a castling move happen?
+        self.castling_rights_log = []
 
         self.white_king = self.board[7][4]
         self.black_king = self.board[0][4]
@@ -45,6 +48,9 @@ class GameEngine:
         self.en_passant_move_white = ()
         self.en_passant_possible_black = False
         self.en_passant_move_black = ()
+
+        self.white_castling_rights = CastlingRights(True, True)
+        self.black_castling_rights = CastlingRights(True, True)
 
     def notify(self, event):
         """
@@ -129,6 +135,9 @@ class GameEngine:
         is_en_passant_move = self.is_en_passant_move(clicked_piece, selected_piece)
         self.en_passant_move_log.append(is_en_passant_move)
 
+        # is_kingside_castle = self.is_kingside_castle(clicked_piece, selected_piece)
+        # is_queenside_castle = self.is_queenside_castle(clicked_piece, selected_piece)
+
         if is_en_passant_move:
             self.move_log.append((selected_piece, self.get_piece_in_front(clicked_piece)))
         self.move_log.append((selected_piece, clicked_piece))
@@ -141,6 +150,16 @@ class GameEngine:
             pseudo_legal_moves = self.update_pseudo_legal_moves_for_en_passant(pseudo_legal_moves,
                                                                                self.selected_piece,
                                                                                self.board)
+
+        if self.selected_piece.TYPE == KING and self.is_castling_kingside_possible():
+            pseudo_legal_moves = self.update_pseudo_legal_moves_for_kingside_castling(pseudo_legal_moves,
+                                                                                      self.selected_piece,
+                                                                                      self.board)
+
+        if self.selected_piece.TYPE == KING and self.is_castling_queenside_possible():
+            pseudo_legal_moves = self.update_pseudo_legal_moves_for_queenside_castling(pseudo_legal_moves,
+                                                                                      self.selected_piece,
+                                                                                      self.board)
         return pseudo_legal_moves
 
     def get_legal_moves(self):
@@ -213,15 +232,15 @@ class GameEngine:
 
         return board_copy, white_king, black_king
 
-    def update_pseudo_legal_moves_for_en_passant(self, pseudo_legal_moves, selected_piece, board):
-        if selected_piece.COLOR == WHITE and self.en_passant_possible_white:
-            pseudo_legal_moves = selected_piece.update_pseudo_legal_moves_for_en_passant_white(pseudo_legal_moves,
-                                                                                               board,
-                                                                                               self.en_passant_move_white)
-        elif selected_piece.COLOR == BLACK and self.en_passant_possible_black:
-            pseudo_legal_moves = selected_piece.update_pseudo_legal_moves_for_en_passant_black(pseudo_legal_moves,
-                                                                                               board,
-                                                                                               self.en_passant_move_black)
+    def update_pseudo_legal_moves_for_en_passant(self, pseudo_legal_moves, selected_pawn, board):
+        if selected_pawn.COLOR == WHITE and self.en_passant_possible_white:
+            pseudo_legal_moves = selected_pawn.update_pseudo_legal_moves_for_en_passant_white(pseudo_legal_moves,
+                                                                                              board,
+                                                                                              self.en_passant_move_white)
+        elif selected_pawn.COLOR == BLACK and self.en_passant_possible_black:
+            pseudo_legal_moves = selected_pawn.update_pseudo_legal_moves_for_en_passant_black(pseudo_legal_moves,
+                                                                                              board,
+                                                                                              self.en_passant_move_black)
         return pseudo_legal_moves
 
     def is_en_passant_possible(self):
@@ -239,20 +258,6 @@ class GameEngine:
 
         return is_en_passant_move
 
-    # def capture_en_passant(self, blank_piece, taker_piece):
-    #     captured_piece = self.get_piece_in_front(blank_piece)
-    #
-    #     self.board[taker_piece.row][taker_piece.column] = Blank(taker_piece.row, taker_piece.column)
-    #     self.board[captured_piece.row][captured_piece.column] = Blank(captured_piece.row, captured_piece.column)
-    #
-    #     taker_piece.row, taker_piece.column = blank_piece.row, blank_piece.column
-    #
-    #     # Pawn Promotion
-    #     if taker_piece.TYPE == PAWN and taker_piece.should_promote():
-    #         taker_piece = taker_piece.transform_to_queen()
-    #
-    #     self.board[taker_piece.row][taker_piece.column] = taker_piece
-
     def capture_en_passant(self, blank_piece, taker_piece):
         captured_piece = self.get_piece_in_front(blank_piece)
         self.capture(captured_piece, taker_piece)
@@ -264,5 +269,55 @@ class GameEngine:
         elif self.color_to_move == BLACK:
             captured_piece = self.board[blank_piece.row - 1][blank_piece.column]
         return captured_piece
+
+    def is_castling_kingside_possible(self):
+        if self.color_to_move == WHITE:
+            return self.white_castling_rights.can_castle_kingside
+        elif self.color_to_move == BLACK:
+            return self.black_castling_rights.can_castle_kingside
+
+    def is_castling_queenside_possible(self):
+        if self.color_to_move == WHITE:
+            return self.white_castling_rights.can_castle_queenside
+        elif self.color_to_move == BLACK:
+            return self.black_castling_rights.can_castle_queenside
+
+    def update_pseudo_legal_moves_for_kingside_castling(self, pseudo_legal_moves, selected_king, board):
+        if selected_king.COLOR == WHITE:
+            pseudo_legal_moves = selected_king.update_pseudo_legal_moves_for_kingside_castling_white(pseudo_legal_moves,
+                                                                                              board,
+                                                                                              self.en_passant_move_white)
+        elif selected_king.COLOR == BLACK:
+            pseudo_legal_moves = selected_king.update_pseudo_legal_moves_for_kingside_castling_black(pseudo_legal_moves,
+                                                                                              board,
+                                                                                              self.en_passant_move_black)
+        return pseudo_legal_moves
+
+    def update_castling_rights(self, selected_piece):
+        if selected_piece.TYPE == KING:
+            self.disable_castling_rights_after_king_move(selected_piece)
+        if selected_piece.TYPE == ROOK:
+            self.disable_castling_rights_after_rook_move(selected_piece)
+
+    def disable_castling_rights_after_rook_move(self, selected_piece):
+        if selected_piece.COLOR == WHITE:
+            if (selected_piece.row, selected_piece.column) == (7, 7):
+                self.white_castling_rights.can_castle_kingside = False
+            elif (selected_piece.row, selected_piece.column) == (7, 0):
+                self.white_castling_rights.can_castle_queenside = False
+        elif selected_piece.COLOR == BLACK:
+            if (selected_piece.row, selected_piece.column) == (0, 7):
+                self.black_castling_rights.can_castle_kingside = False
+            elif (selected_piece.row, selected_piece.column) == (0, 0):
+                self.black_castling_rights.can_castle_queenside = False
+
+    def disable_castling_rights_after_king_move(self, selected_piece):
+        if selected_piece.COLOR == WHITE:
+            self.white_castling_rights.can_castle_kingside = False
+            self.white_castling_rights.can_castle_queenside = False
+        elif selected_piece.COLOR == BLACK:
+            self.black_castling_rights.can_castle_kingside = False
+            self.black_castling_rights.can_castle_queenside = False
+
 
 
