@@ -28,16 +28,6 @@ class Pawn(Piece):
     def __init__(self, color, row=-1, column=-1):
         super().__init__(color, row, column)
 
-    def get_legal_moves(self, board):
-        moves = set()
-        if self.COLOR == WHITE:
-            self._get_legal_moves_white(board, moves)
-        elif self.COLOR == BLACK:
-            self._get_legal_moves_black(board, moves)
-
-    def _get_legal_moves_white(self, board, moves):
-        pass
-
     def get_pseudo_legal_moves(self, board):
         moves = set()
         if self.COLOR == WHITE:
@@ -46,7 +36,7 @@ class Pawn(Piece):
         elif self.COLOR == BLACK:
             self._check_forward_moves_black(board, moves)
             self._check_captures_black(board, moves)
-        # TODO: Pawn Promotions
+
         return moves
 
     def _check_forward_moves_white(self, board, moves):
@@ -270,10 +260,6 @@ class King(Piece):
                         break
                     elif end_piece.COLOR == opposite_color:
                         if in_range_of_king(end_piece, num_squares_away) or is_cardinal_piece(end_piece):
-                            print("cardinal")
-                            print(end_piece.TYPE)
-                            print(end_piece.row)
-                            print(end_piece.column)
                             return True
                         # if a enemy piece that doesn't check the king is found, stop looking in this direction
                         break
@@ -294,10 +280,6 @@ class King(Piece):
                         if (in_range_of_king(end_piece, num_squares_away)
                                 or in_range_of_pawn(end_piece, num_squares_away, direction)
                                 or is_diagonal_piece(end_piece)):
-                            print("diagonal")
-                            print(end_piece.TYPE)
-                            print(end_piece.row)
-                            print(end_piece.column)
                             return True
                         # if a enemy piece that doesn't check the king is found, stop looking in this direction
                         break
@@ -313,10 +295,6 @@ class King(Piece):
             if on_the_board(end_row, end_column):
                 end_piece = board[end_row][end_column]
                 if end_piece.COLOR == opposite_color and end_piece.TYPE == KNIGHT:
-                    print("knight")
-                    print(end_piece.TYPE)
-                    print(end_piece.row)
-                    print(end_piece.column)
                     return True
         return False
 

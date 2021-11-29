@@ -140,10 +140,6 @@ class GameEngine:
         self.castle_move_log.append(is_kingside_castle_move or is_queenside_castle_move)
 
         self.castling_rights_log.append((deepcopy(self.white_castling_rights), deepcopy(self.black_castling_rights)))
-        print("white castling rights: ", self.white_castling_rights.can_castle_kingside,
-              self.white_castling_rights.can_castle_queenside)
-        print("black castling rights: ", self.black_castling_rights.can_castle_kingside,
-              self.black_castling_rights.can_castle_queenside)
 
         if is_en_passant_move:
             self.move_log.append((selected_piece, self.get_piece_in_front(clicked_piece)))
@@ -152,9 +148,6 @@ class GameEngine:
         elif is_queenside_castle_move:
             self.move_log.append(self.get_queenside_castle_rook_move_copy())
         self.move_log.append((selected_piece, clicked_piece))
-        print("Selected_piece type: ", selected_piece.TYPE)
-        print("Clicked piece type: ", clicked_piece.TYPE)
-        print("ep move log: ", self.en_passant_move_log)
 
     def get_pseudo_legal_moves(self):
         pseudo_legal_moves = self.selected_piece.get_pseudo_legal_moves(self.board)
@@ -181,7 +174,6 @@ class GameEngine:
             white_king_check_status, black_king_check_status = self.get_check_status_with_board_and_kings(board_copy,
                                                                                                           white_king,
                                                                                                           black_king)
-            print("color to move: ", self.color_to_move)
             if self.color_to_move == WHITE:
                 in_check = white_king_check_status
             else:
@@ -204,16 +196,6 @@ class GameEngine:
 
     def update_check_status(self):
         self.white_king.in_check, self.black_king.in_check = self.get_check_status()
-
-        print(self.color_to_move)
-        print("White King: ")
-        print("-------------")
-        print(f"Location: {self.white_king.row}, {self.white_king.column}")
-        print(f"In Check: {self.white_king.in_check}")
-        print("Black King: ")
-        print("-------------")
-        print(f"Location: {self.black_king.row}, {self.black_king.column}")
-        print(f"In Check: {self.black_king.in_check}")
 
     def try_pseudo_legal_move(self, board_copy, move):
         target_piece_row, target_piece_column = move
@@ -273,7 +255,7 @@ class GameEngine:
             captured_piece = self.board[blank_piece.row + 1][blank_piece.column]
         elif self.color_to_move == BLACK:
             captured_piece = self.board[blank_piece.row - 1][blank_piece.column]
-        return blank_piece
+        return captured_piece
 
     def is_castling_kingside_possible(self):
         if self.color_to_move == WHITE:
@@ -375,7 +357,6 @@ class GameEngine:
         end_square, kingside_rook = self.get_kingside_castle_rook_move()
 
         self.swap(end_square, kingside_rook)
-        print("Kingside rook location: ", kingside_rook.row, kingside_rook.column)
 
     def get_kingside_castle_rook_move(self):
         if self.color_to_move == WHITE:
@@ -430,6 +411,3 @@ class GameEngine:
 
     def undo_castling_rights(self):
         self.white_castling_rights, self.black_castling_rights = self.castling_rights_log.pop()
-        print("white castling rights: ", self.white_castling_rights.can_castle_kingside, self.white_castling_rights.can_castle_queenside)
-        print("black castling rights: ", self.black_castling_rights.can_castle_kingside,
-              self.black_castling_rights.can_castle_queenside)

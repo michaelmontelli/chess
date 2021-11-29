@@ -56,8 +56,6 @@ class Keyboard:
             self.select_piece(clicked_piece)
         else:    # Player wants to move piece to the selected blank square or capture
             self.handle_turn(clicked_piece)
-            print("en_passant: ", self.model.en_passant_possible_black)
-            print(self.model.en_passant_possible_white or self.model.en_passant_possible_black)
 
     def select_piece(self, piece):
         previous_selected_piece = self.model.selected_piece
@@ -66,8 +64,6 @@ class Keyboard:
 
         piece.is_selected = True
         self.model.selected_piece = piece
-        print(self.model.get_pseudo_legal_moves())
-        print(self.model.get_legal_moves())
 
     def handle_turn(self, clicked_piece):
         previous_selected_piece = self.model.selected_piece
@@ -116,8 +112,6 @@ class Keyboard:
 
         selected_piece_copy = deepcopy(selected_piece)
         clicked_piece_copy = deepcopy(clicked_piece)
-        print("selected_piece type: ", selected_piece_copy.TYPE)
-        print("clicked_piece type: ", clicked_piece_copy.TYPE)
 
         for piece in (selected_piece_copy, clicked_piece_copy):
             if piece is not None:
@@ -176,7 +170,5 @@ class Keyboard:
         rook, rook_blank_piece = self.model.move_log.pop()
 
         self.place_move_on_board(king, king_blank_piece)
-        print("Rook location: ", rook.row, rook.column)
-        print("Blank piece location: ", rook_blank_piece.row, rook_blank_piece.column)
         self.place_move_on_board(rook, rook_blank_piece)
 
