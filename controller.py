@@ -75,8 +75,8 @@ class Keyboard:
             legal_moves = self.model.get_legal_moves()
 
             if (clicked_piece.row, clicked_piece.column) in legal_moves:
-                self.model.update_castling_rights(self.model.selected_piece)
                 self.append_move(clicked_piece)
+                self.model.update_castling_rights()
                 self.process_move(clicked_piece)
                 self.model.update_check_status()
 
@@ -94,6 +94,10 @@ class Keyboard:
         if previous_selected_piece is not None and previous_selected_piece.is_selected:
             if self.model.is_en_passant_move(clicked_piece, previous_selected_piece):
                 self.model.capture_en_passant(clicked_piece, previous_selected_piece)
+            elif self.model.is_kingside_castle_move(clicked_piece, previous_selected_piece):
+                self.model.castle_kingside(clicked_piece, previous_selected_piece)
+            elif self.model.is_queenside_castle_move(clicked_piece, previous_selected_piece):
+                self.model.castle_queenside(clicked_piece, previous_selected_piece)
             else:
                 self.model.swap(clicked_piece, previous_selected_piece)
 
@@ -129,19 +133,23 @@ class Keyboard:
         self.model.color_to_move = not self.model.color_to_move
 
         if len(self.model.move_log) > 0:
-            en_passant_move = self.model.en_passant_move_log.pop()
-            if not en_passant_move:
-                self.regular_replace_pieces()
-            else:
+            is_en_passant_move = self.model.en_passant_move_log.pop()
+            is_castle_move = self.model.castle_move_log.pop()
+
+            if is_en_passant_move:
                 self.en_passant_replace_pieces()
+            elif is_castle_move:
+                self.castle_move_replace_pieces()
+            else:
+                self.regular_replace_pieces()
 
         # # If the move log is empty, it means we are at the first turn of the game.
         # # White always moves first
         if len(self.model.move_log) == 0:
             self.model.color_to_move = True
 
-        # TODO: Make sure correct
         self.model.update_check_status()
+        self.model.undo_castling_rights()
 
     def regular_replace_pieces(self):
         selected_piece, clicked_piece = self.model.move_log.pop()
@@ -162,4 +170,13 @@ class Keyboard:
                     self.model.white_king = piece
                 elif piece.TYPE == KING and piece.COLOR == BLACK:
                     self.model.black_king = piece
+
+    def castle_move_replace_pieces(self):
+        king, king_blank_piece = self.model.move_log.pop()
+        rook, rook_blank_piece = self.model.move_log.pop()
+
+        self.place_move_on_board(king, king_blank_piece)
+        print("Rook location: ", rook.row, rook.column)
+        print("Blank piece location: ", rook_blank_piece.row, rook_blank_piece.column)
+        self.place_move_on_board(rook, rook_blank_piece)
 

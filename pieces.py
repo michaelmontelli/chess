@@ -320,13 +320,11 @@ class King(Piece):
                     return True
         return False
 
-    def update_pseudo_legal_moves_for_kingside_castling_white(self, pseudo_legal_moves, board, en_passant_move):
-        left_diagonal_square = (self.row - 1, self.column - 1) if self.column > 0 else ()
-        right_diagonal_square = (self.row - 1, self.column + 1) if self.column < len(board) - 1 else ()
-        if en_passant_move in {left_diagonal_square, right_diagonal_square}:
-            pseudo_legal_moves.add(en_passant_move)
+    def is_two_squares_to_the_right(self, piece):
+        return self.row == piece.row and self.column - piece.column == -2
 
-        return pseudo_legal_moves
+    def is_two_squares_to_the_left(self, piece):
+        return self.row == piece.row and self.column - piece.column == 2
 
 
 class Blank(Piece):
