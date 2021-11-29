@@ -1,6 +1,6 @@
 from copy import deepcopy
 from constants import *
-import pygame
+from move import Move
 from eventmanager import *
 from board import Board
 from pieces import Blank
@@ -37,6 +37,8 @@ class GameEngine:
         self.selected_piece = None
         self.color_to_move = WHITE
         self.move_log = []
+        self.current_move = None
+
         self.en_passant_move_log = []  # Did an en passant move happen?
         self.castle_move_log = []  # Did a castling move happen?
         self.castling_rights_log = []
@@ -147,7 +149,9 @@ class GameEngine:
             self.move_log.append((self.get_kingside_castle_rook_move_copy()))
         elif is_queenside_castle_move:
             self.move_log.append(self.get_queenside_castle_rook_move_copy())
+
         self.move_log.append((selected_piece, clicked_piece))
+        self.current_move = Move(selected_piece.row, selected_piece.column, clicked_piece.row, clicked_piece.column)
 
     def get_pseudo_legal_moves(self):
         pseudo_legal_moves = self.selected_piece.get_pseudo_legal_moves(self.board)

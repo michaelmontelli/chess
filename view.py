@@ -15,8 +15,11 @@ WHITE_COLOR = (234, 232, 210)
 BLACK_COLOR = (75, 115, 153)
 HIGHLIGHTED_WHITE_COLOR = (140, 199, 232)
 HIGHLIGHTED_BLACK_COLOR = (53, 139, 203)
-COLOR_SHADES = [pygame.Color(WHITE_COLOR), pygame.Color(BLACK_COLOR)]
+LEGAL_MOVE_WHITE_COLOR = (210, 209, 188)
+LEGAL_MOVE_BLACK_COLOR = (67, 103, 138)
+COLOR_SHADES = [WHITE_COLOR, BLACK_COLOR]
 HIGHLIGHTED_COLOR_SHADES = [HIGHLIGHTED_WHITE_COLOR, HIGHLIGHTED_BLACK_COLOR]
+LEGAL_MOVE_SHADES = [LEGAL_MOVE_WHITE_COLOR, LEGAL_MOVE_BLACK_COLOR]
 
 
 def color_type_to_name(color_type: ColorType) -> str:
@@ -126,13 +129,17 @@ class GraphicalView:
                         self.select_piece(piece.row, piece.column)
                     else:
                         self.deselect_piece(piece.row, piece.column)
-                    self.screen.blit(IMAGES[piece.COLOR][piece.TYPE], (piece.column * SQUARE_SIZE, piece.row * SQUARE_SIZE))
+                    self.screen.blit(IMAGES[piece.COLOR][piece.TYPE],
+                                     (piece.column * SQUARE_SIZE, piece.row * SQUARE_SIZE))
                 else:
                     color = COLOR_SHADES[(piece.row + piece.column) % 2]
                     pygame.draw.rect(self.screen,
                                      color,
-                                     pygame.Rect(piece.column * SQUARE_SIZE, piece.row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE)
+                                     pygame.Rect(piece.column * SQUARE_SIZE, piece.row * SQUARE_SIZE, SQUARE_SIZE,
+                                                 SQUARE_SIZE)
                                      )
+        if self.model.selected_piece is not None:
+            self.show_legal_moves()
 
     def select_piece(self, row, column):
         color = HIGHLIGHTED_COLOR_SHADES[(row + column) % 2]  # Light squares have even parity, dark have odd parity
@@ -147,3 +154,21 @@ class GraphicalView:
                          color,
                          pygame.Rect(column * SQUARE_SIZE, row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE)
                          )
+
+    def show_legal_moves(self):
+        legal_moves = self.model.get_legal_moves()
+        for move in legal_moves:
+            row, column = move
+            piece = self.model.board[row][column]
+            color = LEGAL_MOVE_SHADES[(row + column) % 2]  # Light squares have even parity, dark have odd parity
+            if self.model.board[row][column].TYPE == BLANK:
+                pygame.draw.circle(self.screen,
+                                   color,
+                                   center=(column * SQUARE_SIZE + 50, row * SQUARE_SIZE + 50), radius=15)
+            else:
+                pygame.draw.circle(self.screen,
+                                   color,
+                                   center=(column * SQUARE_SIZE + 50, row * SQUARE_SIZE + 50), radius=50, width=8)
+                self.screen.blit(IMAGES[piece.COLOR][piece.TYPE],
+                                 (piece.column * SQUARE_SIZE, piece.row * SQUARE_SIZE))
+
